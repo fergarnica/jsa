@@ -1,0 +1,128 @@
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Seguimiento de ordenes</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="/">Inicio</a></li>
+                        <li class="breadcrumb-item active">Seguimiento de ordenes</li>
+                    </ol>
+                </div>
+            </div>
+        </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <!-- Default box -->
+        <div class="card" id="cardOrdenes">
+            <!-- Card Header -->
+            <div class="card-header ui-sortable-handle">
+
+                <div>
+                    <form id="formSegOrdenes">
+                        <div class="row">
+                            <div class="col-12 col-sm-3">
+                                <div class="form-group">
+                                    <label>Estatus:</label>
+                                    <select class="form-control input-lg custom-select" id="statusOrd" required>
+                                        <option value="">Seleccionar...</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-3">
+                                <div class="form-group">
+                                    <label for=""></label>
+                                    <div class="input-group">
+                                        <button type="submit" id="btnOrdenes" class="btn btn-primary">Consultar
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+
+            </div>
+
+            <!-- Card Body -->
+            {{!-- <div class="card-body" id="bodySegOrd">
+
+            </div> --}}
+            <!-- /.card-body -->
+            <!-- <div class="card-footer">
+          Footer
+        </div> -->
+            <!-- /.card-footer-->
+        </div>
+        <!-- /.card -->
+    </section>
+    <!-- /.content -->
+</div>
+
+<!--=====================================
+MODAL ASIGNAR VERIFICADOR
+======================================-->
+<!-- Modal -->
+<div class="modal fade" id="modalAsignarOrden" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background:#336699; color:white">
+                <h5 class="modal-title">Asignar Verificador</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="formAsigOrden">
+                <div class="modal-body">
+                    <input type="hidden" id="idOrdenAsig">
+                    <div class="form-group">
+                        <label for="recipient-name" class="col-form-label">Número de Orden:</label>
+                        <div class="input-group mb-2 mr-sm-2">
+                            <div class="input-group-prepend">
+                                <div class="input-group-text"><i class="fas fa-clipboard-check"></i></div>
+                            </div>
+                            <input type="text" class="form-control" id="numOrden" placeholder="Número de Orden..." autocomplete="off"
+                                required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="recipient-name" class="col-form-label">Verificador:</label>
+                        <div class="input-group mb-2 mr-sm-2">
+                            <div class="input-group-prepend">
+                                <div class="input-group-text"><i class="fas fa-user-check"></i></div>
+                            </div>
+                            <select class="form-control input-lg custom-select" id="selAsigVer" required>
+                                <option value="">Seleccionar verificador...</option>
+                            </select>
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="recipient-name" class="col-form-label">Fecha:</label>
+                        <div class="input-group mb-2 mr-sm-2">
+                            <div class="input-group-prepend">
+                                <div class="input-group-text"><i class="fas fa-calendar-check"></i></div>
+                            </div>
+                            <input class="form-control" id="fecOrden" name="date" placeholder="DD/MM/YYYY" type="text" autocomplete="off"
+                                required>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Salir</button>
+                    <button type="submit" id="btn-agregar-verif" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

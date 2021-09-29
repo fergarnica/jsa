@@ -1,0 +1,115 @@
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Capturar orden</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Inicio</a></li>
+                        <li class="breadcrumb-item active">Capturar orden</li>
+                    </ol>
+                </div>
+            </div>
+        </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <!-- Default box -->
+        <div class="card">
+            <!-- Card Header -->
+            <div class="card-header">
+
+                <h3 class="card-title">
+                    <i class="fas fa-pencil-alt"></i>
+                    Información Básica de Ordenes
+                    <small>(Los campos con </small><small style="color:#C20F30">*</small><small> son necesarios)</small>
+                </h3>
+            </div>
+            <!-- Card Body -->
+            <div class="card-body">
+                <form id="formNewOrden" method="get">
+                    
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Oficina:</label><label style="color:#C20F30">*</label>
+                                <select class="form-control input-lg custom-select" id="selectOficina" required autofocus>
+                                    <option value="">Seleccionar oficina...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Censador:</label><label style="color:#C20F30">*</label>
+                                <select class="form-control input-lg custom-select" id="selectVerif" required>
+                                    <option value="">Seleccionar censador...</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Actividad:</label><label style="color:#C20F30">*</label>
+                                <select class="form-control input-lg custom-select" id="selectActi" required>
+                                    <option value="">Seleccionar actividad...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Giro:</label><label style="color:#C20F30">*</label>
+                                <input type="text" class="form-control" id="giroOrden"
+                                    placeholder="Ingresar giro..." required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Municipio:</label><label style="color:#C20F30">*</label>
+                                <select class="form-control input-lg custom-select" id="selectMnpio" required>
+                                    <option value="">Seleccionar municipio...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Establecimiento:</label><label style="color:#C20F30">*</label>
+                                <input type="text" id="estabOrden" class="form-control"
+                                    placeholder="Ingresar establecimiento...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Ubicación:</label><label style="color:#C20F30">*</label>
+                                <input type="text" id="ubicOrden" class="form-control"
+                                    placeholder="Ingresar ubicación...">
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            <div class="card-footer">
+                <button type="submit" id="btnCrearOrden" class="btn btn-primary">Guardar
+                    <i class="fas fa-save"></i>
+                </button>
+                {{!-- <button type="button" class="btn btn-danger float-right"
+                    onclick="location.href='/empleados'">Regresar
+                    <i class="fas fa-undo-alt"></i>
+                </button> --}}
+            </div>
+            </form>
+        </div>
+        <!-- /.card -->
+    </section>
+    <!-- /.content -->
+</div>

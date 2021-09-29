@@ -1,0 +1,46 @@
+<div class="login-logo">
+</div>
+<!-- /.login-logo -->
+<div class="card card-outline card-primary">
+
+  <div class="card-body login-card-body">
+    <p></p>
+    <p class="login-box-msg">Inicia sesión</p>
+    <hr>
+    <form id="login" role="form" action="/signin" data-plugin="parsley" data-option="{}" method="POST">
+      <label for="recipient-name" class="col-form-label">Usuario:</label>
+      <div class="input-group mb-3">
+        <input type="text" id="usuario" name="usuario" class="form-control" placeholder="Ingrese su usuario" required
+          autofocus>
+        <div class="input-group-append">
+          <div class="input-group-text">
+            <span class="fas fa-user"></span>
+          </div>
+        </div>
+      </div>
+      <label for="recipient-name" class="col-form-label">Contraseña:</label>
+      <div class="input-group mb-3">
+        <input type="password" class="form-control" id="password" name="password" placeholder="Ingrese su contraseña"
+          required>
+        <div class="input-group-append">
+          <div class="input-group-text">
+            <span class="fas fa-lock"></span>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="input-group mb-3">
+
+      </div>
+      <div class="social-auth-links text-center">
+        <button type="submit" class="btn mb-2 btn-primary btn-block">Ingresa</button>
+        <!-- /.col -->
+      </div>
+
+      <p class="mb-1">
+        <a href="/restablecer">Olvide mi contraseña</a>
+      </p>
+    </form>
+  </div>
+</div>

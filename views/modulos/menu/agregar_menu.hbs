@@ -1,0 +1,90 @@
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Agregar menú</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Inicio</a></li>
+                        <li class="breadcrumb-item active">Agregar menú</li>
+                    </ol>
+                </div>
+            </div>
+        </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <!-- Default box -->
+        <div class="card card-primary card-outline card-outline-tabs">
+            <!-- Card Header -->
+            <div class="card-header">
+
+                <h3 class="card-title">
+                    <i class="fas fa-plus"></i>
+                    Nuevo Menú
+                    <small>(Los campos con </small><small style="color:#C20F30">*</small><small> son necesarios)</small>
+                </h3>
+            </div>
+            <!-- Card Body -->
+            <form id="formNewMenu">
+                <div class="card-body">
+
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>ID Menú:</label>
+                                <input class="form-control" id="newidMenu" type="number" value="{{ idmenu }}" required disabled>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Orden:</label>
+                                <input class="form-control" id="neworden" type="number" value="{{ orden }}" required disabled>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Nombre Menú: </label><label style="color:#C20F30">*</label>
+                                <input class="form-control" id="newMenu" type="text" required autofocus>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>URL:</label><label style="color:#C20F30">*</label>
+                                <input class="form-control" id="newUrl" type="text" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Icono:</label><label style="color:#C20F30">*</label>
+                                <input class="form-control" id="newIcono" type="text" required>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- /.card -->
+                <div class="card-footer">
+                    <button type="submit" id="btnCrearMenu" class="btn btn-primary">Guardar
+                        <i class="fas fa-save"></i>
+                    </button>
+                    <button type="button" class="btn btn-danger float-right"
+                        onclick="location.href='/menus'">Regresar
+                        <i class="fas fa-undo-alt"></i>
+                    </button>
+                </div>
+
+            </form>
+    </section>
+    <!-- /.content -->
+</div>

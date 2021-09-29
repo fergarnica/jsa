@@ -1,0 +1,103 @@
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Agregar empleado</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Inicio</a></li>
+                        <li class="breadcrumb-item active">Agregar empleado</li>
+                    </ol>
+                </div>
+            </div>
+        </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <!-- Default box -->
+        <div class="card">
+            <!-- Card Header -->
+            <div class="card-header">
+
+                <h3 class="card-title">
+                    <i class="fas fa-pencil-alt"></i>
+                    Información Básica de Empleados
+                    <small>(Los campos con </small><small style="color:#C20F30">*</small><small> son necesarios)</small>
+                </h3>
+            </div>
+            <!-- Card Body -->
+            <div class="card-body">
+                <form id="formNewEmpleado" method="get">
+
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Nombre:</label><label style="color:#C20F30">*</label>
+                                <input type="text" class="form-control" id="empNombre" placeholder="Ingresar Nombre"
+                                    required autofocus>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Apellido Materno:</label><label style="color:#C20F30">*</label>
+                                <input type="text" class="form-control" id="empPat"
+                                    placeholder="Ingresar Apellido Paterno" required>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Apellido Paterno:</label><label style="color:#C20F30">*</label>
+                                <input type="text" class="form-control" id="empMat"
+                                    placeholder="Ingresar Apellido Materno" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>E-mail:</label><label style="color:#C20F30">*</label>
+                                <input type="email" name="email" class="form-control" id="empEmail"
+                                    placeholder="Ingresar Correo Electronico" required>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Telefono:</label><label style="color:#C20F30">*</label>
+                                <input type="text" id="empTel" class="form-control"
+                                    placeholder="Ingresar Número Telefonico">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Fecha de Contratación:</label><label style="color:#C20F30">*</label>
+                                <input class="form-control" id="fecCont" name="date" placeholder="DD/MM/YYYY"
+                                    type="text" required>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            <div class="card-footer">
+                <button type="submit" id="btnCrearEmpleado" class="btn btn-primary">Guardar
+                    <i class="fas fa-save"></i>
+                </button>
+                <button type="button" class="btn btn-danger float-right" onclick="location.href='/empleados'">Regresar
+                    <i class="fas fa-undo-alt"></i>
+                </button>
+            </div>
+            </form>
+        </div>
+        <!-- /.card -->
+    </section>
+    <!-- /.content -->
+</div>

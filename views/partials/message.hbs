@@ -1,0 +1,35 @@
+{{#if error}}
+<div class="col-md-12 mx-auto">
+    <div class="alert alert-danger alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <h5><i class="icon fas fa-ban"></i> Atención!</h5>
+        {{error}}
+    </div>
+</div>
+{{/if}}
+
+{{#if success}}
+<div class="col-sm-6 mx-auto">
+    <div class="alert alert-success alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <h5><i class="icon fas fa-check"></i> Atención!</h5>
+        {{success}}
+    </div>
+</div>
+{{/if}}
+
+{{#if warning}}
+<div class="alert alert-warning alert-dismissible">
+    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+    <h5><i class="icon fas fa-exclamation-triangle"></i> Atención!</h5>
+    {{warning}}
+</div>
+{{/if}}
+
+{{#if info}}
+<div class="alert alert-info alert-dismissible">
+    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+    <h5><i class="icon fas fa-info"></i> Atención!</h5>
+    {{info}}
+</div>
+{{/if}}
