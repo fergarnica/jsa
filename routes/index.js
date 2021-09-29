@@ -33,6 +33,16 @@ module.exports = function () {
         authController.logout
     );
 
+    //Cambiar contraseña
+    router.get('/cambiar_password',
+        isLoggedIn,
+        authController.formChangePassword
+    );
+    router.put('/cambiar_password',
+        isLoggedIn,
+        authController.cambiarPassword
+    );
+
     //Menus
     router.get('/menus',
         isLoggedIn,
@@ -334,6 +344,10 @@ module.exports = function () {
     router.get('/agenda_ordenes',
         isLoggedIn,
         ordenesController.agendaOrdenes
+    );
+    router.post('/print_orden',
+        isLoggedIn,
+        ordenesController.printOrden
     );
 
     router.post('/consultar_agenda',

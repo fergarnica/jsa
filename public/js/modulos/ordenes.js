@@ -27,59 +27,81 @@ if (formNewOrden) {
 
     axios.all([requestUno, requestDos, requestTres, requestCuatro]).then(axios.spread((...respuesta) => {
 
-        const responseUno = respuesta[0];
-        const responseDos = respuesta[1];
-        const responseTres = respuesta[2];
-        const responseCuatro = respuesta[3];
+        if (respuesta.length > 0) {
 
-        var dataVerif = responseUno.data;
-        var dataOfic = responseDos.data;
-        var dataActi = responseTres.data;
-        var dataMnpio = responseCuatro.data;
+            const responseUno = respuesta[0];
+            const responseDos = respuesta[1];
+            const responseTres = respuesta[2];
+            const responseCuatro = respuesta[3];
 
-        dataVerif.forEach(function (valor, indice, array) {
+            if (responseUno.data.length > 0) {
 
-            var idVerif = valor[1];
-            var verificador = valor[2];
+                var dataVerif = responseUno.data;
 
-            $("<option />")
-                .attr("value", idVerif)
-                .html(verificador)
-                .appendTo("#selectVerif");
-        });
+                dataVerif.forEach(function (valor, indice, array) {
 
-        dataOfic.forEach(function (valor, indice, array) {
+                    var idVerif = valor[1];
+                    var verificador = valor[2];
 
-            var idOffice = valor[1];
-            var oficina = valor[2];
+                    $("<option />")
+                        .attr("value", idVerif)
+                        .html(verificador)
+                        .appendTo("#selectVerif");
+                });
+            }
 
-            $("<option />")
-                .attr("value", idOffice)
-                .html(oficina)
-                .appendTo("#selectOficina");
-        });
+            if (responseDos.data.length > 0) {
 
-        dataActi.forEach(function (valor, indice, array) {
+                var dataOfic = responseDos.data;
 
-            var idActi = valor[1];
-            var actividad = valor[2];
+                dataOfic.forEach(function (valor, indice, array) {
 
-            $("<option />")
-                .attr("value", idActi)
-                .html(actividad)
-                .appendTo("#selectActi");
-        });
+                    var idOffice = valor[1];
+                    var oficina = valor[2];
 
-        dataMnpio.forEach(function (valor, indice, array) {
+                    $("<option />")
+                        .attr("value", idOffice)
+                        .html(oficina)
+                        .appendTo("#selectOficina");
+                });
 
-            var cveMnpio = valor[2];
-            var municipio = valor[3];
+            }
 
-            $("<option />")
-                .attr("value", cveMnpio)
-                .html(municipio)
-                .appendTo("#selectMnpio");
-        });
+            if (responseTres.data.length > 0) {
+
+                var dataActi = responseTres.data;
+
+                dataActi.forEach(function (valor, indice, array) {
+
+                    var idActi = valor[1];
+                    var actividad = valor[2];
+
+                    $("<option />")
+                        .attr("value", idActi)
+                        .html(actividad)
+                        .appendTo("#selectActi");
+                });
+
+            }
+
+            if (responseCuatro.data.length > 0) {
+
+                var dataMnpio = responseCuatro.data;
+
+                dataMnpio.forEach(function (valor, indice, array) {
+
+                    var cveMnpio = valor[2];
+                    var municipio = valor[3];
+
+                    $("<option />")
+                        .attr("value", cveMnpio)
+                        .html(municipio)
+                        .appendTo("#selectMnpio");
+                });
+
+            }
+
+        }
 
     })).catch(errors => {
         Swal.fire({
@@ -369,6 +391,9 @@ if (formSegOrdenes) {
                                 },
                                 {
                                     title: "Fecha Prog."
+                                },
+                                {
+                                    title: "Imprimir"
                                 }
                                 ]
                             });
@@ -508,7 +533,7 @@ if (formAsigOrden) {
     })
 }
 
-if(statusOrd){
+if (statusOrd) {
     statusOrd.addEventListener('change', function () {
         $('#tbl-ordenes').DataTable().destroy();
         $("#tbl-ordenes").remove();
@@ -530,7 +555,7 @@ $('#reservation').daterangepicker({
     }
 });
 
-if(formAgenOrd){
+if (formAgenOrd) {
 
     formAgenOrd.addEventListener('submit', function (e) {
         e.preventDefault();
@@ -556,7 +581,7 @@ if(formAgenOrd){
 
                 $('#btnAgendaOrd').html('<i class="fa fa-search"></i> Consultar').removeClass('disabled');
 
-                if(respuesta.data != 'empty'){
+                if (respuesta.data != 'empty') {
 
                     var dataSet = respuesta.data;
 
@@ -577,7 +602,7 @@ if(formAgenOrd){
                     $("#bodyAgenda").append(
                         '<table id="tbl-agenda-ords" class="display table-bordered table-striped dt-responsive text-center" cellspacing="0" style="width:100%"> </table>'
                     );
-                    
+
 
                     const tblAgenda = document.querySelector('#tbl-agenda-ords');
 
@@ -661,7 +686,7 @@ if(formAgenOrd){
                         });
                     }
 
-                }else{
+                } else {
 
                     Swal.fire({
                         icon: 'warning',
@@ -678,10 +703,9 @@ if(formAgenOrd){
                     text: 'Error en la Base de Datos'
                 })
             })
-    
+
     })
 }
-
 
 /*=============================================
 EXPORTAR AGENDA
@@ -706,7 +730,7 @@ $(document).on("click", "#btn-export-agenda", function () {
         var data = respuesta.data;
         console.log(data);
 
-        $('#btn-export-agenda').html('Exportar').removeClass('disabled');
+        $('#btn-export-agenda').html('<i class="fa fa-file-excel"></i> Exportar').removeClass('disabled');
 
         if (data) {
 
@@ -736,3 +760,85 @@ $(document).on("click", "#btn-export-agenda", function () {
     });
 
 });
+
+/*=============================================
+IMPRIMIR ORDENES
+=============================================*/
+$(document).on("click", "#btn-imprimir-orden", function () {
+
+    $('#btn-imprimir-orden').html('<span id="loading" class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span> Print...').addClass('disabled');
+
+    var payload = {};
+
+    var idOrden = $(this).attr("idOrden");
+
+    payload.idorden = idOrden;
+
+    axios.post('/print_orden', payload)
+        .then(function (respuesta) {
+
+            var data = respuesta.data;
+
+            if (data.length > 0) {
+
+                $('#btn-imprimir-orden').html('<i class="fa fa-print"></i> Imprimir').removeClass('disabled');
+
+                var type = 'application/pdf';
+                const blobURL = URL.createObjectURL(pdfBlobConversion(data, type));
+                const theWindow = window.open(blobURL);
+                const theDoc = theWindow.document;
+                const theScript = document.createElement('script');
+                function injectThis() {
+                    window.print();
+                }
+                theScript.innerHTML = 'window.onload = ${injectThis.toString()};';
+                theDoc.body.appendChild(theScript);
+
+            } else {
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Oops...',
+                    text: 'No existen registros!',
+                })
+
+            }
+
+        }).catch(() => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Hubo un error',
+                text: 'Error en la base de datos!'
+            }).then(function (result) {
+                if (result.value) {
+                    window.location = "/seguimiento_ordenes";
+                }
+            });
+        });
+
+})
+//converts base64 to blob type for windows
+function pdfBlobConversion(b64Data, contentType) {
+    contentType = contentType || '';
+    var sliceSize = 512;
+    b64Data = b64Data.replace(/^[^,]+,/, '');
+    b64Data = b64Data.replace(/\s/g, '');
+    var byteCharacters = window.atob(b64Data);
+    var byteArrays = [];
+
+    for (var offset = 0; offset < byteCharacters.length; offset = offset + sliceSize) {
+        var slice = byteCharacters.slice(offset, offset + sliceSize);
+
+        var byteNumbers = new Array(slice.length);
+        for (var i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+        }
+
+        var byteArray = new Uint8Array(byteNumbers);
+
+        byteArrays.push(byteArray);
+    }
+
+    var blob = new Blob(byteArrays, { type: contentType });
+    return blob;
+}

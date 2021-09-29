@@ -1,6 +1,7 @@
 const pool = require('../config/db');
 const fs = require('fs');
 const Excel = require('exceljs');
+const pdfMakePrinter = require('pdfmake/src/printer');
 
 const moment = require('moment');
 
@@ -211,6 +212,8 @@ exports.mostrarOrdenes = async (req, res) => {
                 const array = results[x];
                 conteo = x + 1;
 
+                var buttonPrint = "<div class='btn-group'><button type='button' id='btn-imprimir-orden' class='btn btn-info' idOrden=" + "'" + array.idorden + "'" + "><i class='fas fa-print'></i></button></div>";
+
                 var fechaProg = moment(array.fecha_prog).format('DD/MM/YYYY');
 
                 const obj = [
@@ -224,7 +227,8 @@ exports.mostrarOrdenes = async (req, res) => {
                     array.ubicacion,
                     array.num_orden,
                     array.nombre_verif,
-                    fechaProg
+                    fechaProg,
+                    buttonPrint
                 ];
 
                 dataset.push(obj);
@@ -321,7 +325,7 @@ exports.consultarAgenda = async (req, res) => {
             const array = results[x];
 
             var fechaProg = moment(array.fecha_prog).format('DD/MM/YYYY');
-            
+
             const obj = [
                 array.num_orden,
                 array.oficina,
@@ -342,7 +346,7 @@ exports.consultarAgenda = async (req, res) => {
     }
 }
 
-exports.exportAgenda= async (req, res) => {
+exports.exportAgenda = async (req, res) => {
 
     var { fecInicial, fecFinal } = req.body;
 
@@ -368,7 +372,7 @@ exports.exportAgenda= async (req, res) => {
             const array = results[x];
 
             var fechaProg = moment(array.fecha_prog).format('DD/MM/YYYY');
-            
+
             const obj = {
                 num_orden: array.num_orden,
                 oficina: array.oficina,
@@ -658,6 +662,170 @@ Object.byString = function (o, s) {
         }
     }
     return o;
+}
+
+exports.printOrden = async (req, res) => {
+
+    eval(req.body.content);
+
+    var { idorden } = req.body;
+
+    var dataOrdenes = await pool.query('call get_info_orden(?)', [idorden]);
+
+    const results = dataOrdenes[0];
+
+    var valuesTotal = results.length;
+
+    if (valuesTotal === 0) {
+
+        res.send('empty')
+
+    } else {
+
+        const dataOrden = [];
+
+        for (var x = 0; x < results.length; x++) {
+
+            conteo = x + 1;
+            const array = results[x];
+
+            const obj = {
+                num_orden: array.num_orden,
+                oficina: array.oficina,
+                nombre_verif: array.nombre_verif,
+                actividad: array.actividad,
+                giro: array.giro,
+                rfc: array.rfc,
+                ubicacion: array.ubicacion
+            };
+
+            dataOrden.push(obj);
+
+        }
+
+        var fecha_actual = moment().format('DD/MM/YYYY hh:mm a');
+
+
+        var docDefinition = {
+            info: {
+                title: `Orden ${dataOrden[0].num_orden}`
+            },
+            pageSize: 'LETTER',
+            pageOrientation: 'portrait',
+            pageMargins: [40, 40, 40, 40],
+            content: [
+                //{ text: 'REPORTE DE PROVEEDORES', style: 'header' },
+                {
+                    columns: [
+                        {
+                            text: `\n\n\n\nFecha: ${fecha_actual}\n\n`, alignment: 'right', style: 'small'
+                        }
+                    ]
+                },
+                { text: 'Con fundamento en los artículos 4 párrafo cuarto, 14, 16, 21 y 73 fracción XVI, regla tercera de la Constitución Política de los Estados Unidos Mexicanos; 1, 3 fracciones XIII, XIV, XV, XVI, XXII y XXIV, 4 fracción IV, 13 apartado B) fracciones I, IV y VI, 18, del 128 129, al 132, 194, 200 BIS, 393, 395, 396 fracción I, 397, 398, 399, 400, 401, 402, 403, 404 fracciones VII, X y XIII, 411, 412, 414, 431, 436 y 437 de la Ley General de Salud; 2 fracciones I incisos a) y c), II inciso e), 4, 6, 61, 66, 67, 68, 69, 70, 72, 73, 74, 75, 76, 77, 78, 79, 82, 133, 206, 1335 fracción II, 1336 y 1346 del Reglamento de la Ley General de Salud en Materia de Control Sanitario de Actividades, Establecimientos, Productos y Servicios; NORMA Oficial Mexicana NOM-047-SSA1-2011, Salud ambiental-Índices biológicos de exposición para el personal ocupacionalmente expuesto a sustancias químicas; NORMA OFICIAL MEXICANA NOM-048-SSA1-1993, QUE ESTABLECE EL METODO NORMALIZADO PARA LA EVALUACION DE RIESGOS A LA SALUD COMO CONSECUENCIA DE AGENTES AMBIENTALES; NORMA OFICIAL MEXICANA NOM-056-SSA1-1993, REQUISITOS SANITARIOS DEL EQUIPO DE PROTECCION PERSONAL; Cláusulas PRIMERA, SEGUNDA, CUARTA y SÉPTIMA del Acuerdo Específico de Coordinación para el ejercicio de facultades en materia de control y fomento sanitarios publicado en el Diario Oficial de la Federación del trece de diciembre de dos mil cuatro; 2, 3, 19 fracción IV, 25 y 26 de la Ley Orgánica de la Administración Pública del Estado de México; 1.1 fracción I, 2.4, y 2.5 del Código Administrativo del Estado de México; 1, 19 y 128 del Código de Procedimientos Administrativos del Estado de México; y 1, 6, 14 fracción VIII y 25 fracciones I, III, VII y XI del Reglamento Interno del Instituto de Salud del Estado de México; 57 y 110 del Reglamento de Salud del Estado de México; ACUERDO por el que se establecen los Lineamientos Técnicos Específicos para la Reapertura de las Actividades Económicas, publicado en el Diario Oficial de la Federación el veintinueve de mayo de dos mil veinte; ARTÍCULOS PRIMERO, SEGUNDO, TERCERO, QUINTO, SEXTO, SÉPTIMO y transitorio PRIMERO del ACUERDO POR EL QUE SE FORTALECEN LAS MEDIDAS PREVENTIVAS Y DE SEGURIDAD PARA LA MITIGACIÓN Y CONTROL DE LOS RIESGOS PARA LA SALUD QUE IMPLICA LA ENFERMEDAD POR EL VIRUS (COVID-19), EN EL ESTADO DE MÉXICO Y SE ESTABLECE UN PROGRAMA DE VERIFICACIÓN PARA SU CUMPLIMIENTO, publicado en el periódico oficial “Gaceta del Gobierno” del Estado de México, del veintidós de abril del dos mil veinte; ARTÍCULOS PRIMERO, SEGUNDO, TERCERO y transitorios SEGUNDO y TERCERO del ACUERDO DEL EJECUTIVO DEL ESTADO PARA LA TRANSICIÓN GRADUAL DE LAS ACCIONES PREVENTIVAS DETERMINADAS CON MOTIVO DE LA EPIDEMIA CAUSADA POR EL VIRUS SARSCOV2 (COVID 19) PARA EL GOBIERNO DEL ESTADO DE MÉXICO, publicado en el periódico oficial “Gaceta del Gobierno” del Estado de México, del tres de julio de dos mil veinte;  ARTÍCULOS PRIMERO, TERCERO, CUARTO, QUINTO, SEXTO, SÉPTIMO, OCTAVO, NOVENO, DÉCIMO TERCERO, DÉCIMO CUARTO y transitorios PRIMERO y SEGUNDO del ACUERDO POR EL QUE SE ESTABLECE EL PLAN PARA EL REGRESO SEGURO A LAS ACTIVIDADES ECONÓMICAS, SOCIALES, GUBERNAMENTALES Y EDUCATIVAS CON MOTIVO DEL VIRUS SARS-CoV2 (COVID-19), EN EL ESTADO DE MÉXICO, publicado en el periódico oficial “Gaceta del Gobierno” del Estado de México, del tres de julio de dos mil veinte; ARTÍCULOS PRIMERO, SEGUNDO, TERCERO, QUINTO, SEXTO y transitorios PRIMERO y SEGUNDO del ACUERDO POR EL QUE SE FORTALECEN LAS MEDIDAS PREVENTIVAS Y DE SEGURIDAD PARA LA MITIGACIÓN Y CONTROL DE LOS RIESGOS PARA LA SALUD QUE IMPLICA LA ENFERMEDAD POR EL VIRUS (COVID-19), EN EL ESTADO DE MÉXICO, del dieciocho de diciembre del dos mil veinte; ARTÍCULOS PRIMERO Y TERCERO y transitorio ÚNICO del ACUERDO QUE MODIFICA EL DIVERSO POR EL QUE SE FORTALECEN LAS MEDIDAS PREVENTIVAS Y DE SEGURIDAD PARA LA MITIGACIÓN Y CONTROL DE LOS RIESGOS PARA LA SALUD QUE IMPLICA LA ENFERMEDAD POR EL VIRUS (COVID-19), EN EL ESTADO DE MÉXICO, PUBLICADO EL 18 DE DICIEMBRE DE 2020 EN EL PERIÓDICO  OFICIAL “GACETA DEL GOBIERNO”, del ocho de enero de dos mil veintiuno; se expide la presente ORDEN DE VISITA, de tipo ORDINARIA, para ser practicada en:\n\n', style: 'parragrafh' },
+                {
+                    text: [
+                        { text: 'Giro: ', fontSize: 7, bold: true },
+                        `${dataOrden[0].giro}\n`
+                    ],
+                    style: 'small'
+                },
+                {
+                    text: [
+                        { text: 'Denominación Comercial / Razón Social: ', fontSize: 7, bold: true },
+                        `${dataOrden[0].rfc}\n`
+                    ],
+                    style: 'small'
+                },
+                {
+                    text: [
+                        { text: 'Ubicado en: ', fontSize: 7, bold: true },
+                        `${dataOrden[0].ubicacion}\n`
+                    ],
+                    style: 'small'
+                },
+                {
+                    text: [
+                             'Propietario, Responsable, Encargado u Ocupante: \n\n'
+                    ],
+                    bold: true,
+                    style: 'small'
+                },
+                {
+                    text: [
+                        'Se hace de su conocimiento, ',
+                        { text: `${dataOrden[0].nombre_verif} `, fontSize: 7, bold: true },
+                        'verificadores sanitarios adscritos a la Coordinación de Regulación Sanitaria y Comisión para la Protección contra Riesgos Sanitarios del Estado de México, cuyas fotografías deberán coincidir con las credenciales vigentes con que se identifiquen, han sido designados para efectuar la Visita de Verificación sanitaria en los siguientes términos:\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n'
+                    ],
+                    style: 'small',
+                    alignment: 'justify'
+                },
+                {
+                    text: [
+                        { text: 'OBJETO: ', fontSize: 7, bold: true },
+                        'Practicar visita de verificación sanitaria en el establecimiento, instalaciones, equipos, maquinaria, aparatos, y manejo de sustancias, para constatar el cumplimiento del ACUERDO QUE MODIFICA EL DIVERSO POR EL QUE SE FORTALECEN LAS MEDIDAS PREVENTIVAS Y DE SEGURIDAD PARA LA MITIGACIÓN Y CONTROL DE LOS RIESGOS PARA LA SALUD QUE IMPLICA LA ENFERMEDAD POR EL VIRUS (COVID-19), EN EL ESTADO DE MÉXICO, PUBLICADO EL 18 DE DICIEMBRE DE 2020 EN EL PERIÓDICO  OFICIAL “GACETA DEL GOBIERNO”, del ocho de enero de dos mil veintiuno, así como para constatar las condiciones higiénico sanitarias y de saneamiento básico que prevalecen en el mismo; las condiciones en que labora el personal ocupacionalmente expuesto, así como las medidas implementadas conforme a la normatividad sanitaria vigente, para reducir los riesgos en la salud de dicho personal.\n\n'
+                    ],
+                    style: 'small',
+                    alignment: 'justify'
+                },
+                { text: 'ALCANCE: \n\n', fontSize: 7, bold: true },
+                {
+                    ol: [
+                        'Verificar documentación sanitaria (Aviso de funcionamiento).',
+                        'Verificar evidencia documental de capacitación al personal ocupacionalmente expuesto, estudios correspondientes de acuerdo a la actividad ocupacional que desarrollan. ',
+                        'Verificar el uso de equipos de protección personal para el trabajo, adecuado a la actividad que desarrolla el personal ocupacionalmente expuesto.',
+                        'Verificar condiciones generales de mantenimiento, orden y aseo; iluminación y ventilación adecuada, servicios sanitarios con mobiliario y dotación higiénica suficiente; casilleros, letreros alusivos a la higiene del personal, depósitos para basura y área de disposición temporal de residuos sanitarios, drenaje municipal u otras alternativas de disposición de aguas residuales.',
+                        'Verificar los servicios generales del establecimiento, equipos y utensilios, manuales escritos de conservación y mantenimiento de los mismos.',
+                        'Verificar la evidencia documental de control de plagas realizado por personal autorizado, ausencia de fauna nociva y animales domésticos, instalación de dispositivos para su control.'
+                    ],
+                    style: 'small',
+                    alignment: 'justify'
+                }
+            ],
+            styles: {
+                header: {
+                    fontSize: 16,
+                    bold: true,
+                    alignment: 'center'
+                },
+                subheader: {
+                    fontSize: 12,
+                    bold: true
+                },
+                quote: {
+                    italics: true
+                },
+                small: {
+                    fontSize: 7
+                },
+                superMargin: {
+                    margin: [20, 0, 40, 0],
+                    fontSize: 15
+                },
+                parragrafh: {
+                    fontSize: 7,
+                    alignment: 'justify'
+                },
+                tableHeader: {
+                    bold: true
+                }
+            },
+            /* footer: function (currentPage, pageCount) {
+                return [{ text: 'Pagina ' + currentPage.toString() + ' de ' + pageCount, alignment: 'center' }];
+            } */
+        }
+
+        createPdfBinary(docDefinition, function (binary) {
+            res.contentType('application/pdf');
+            res.send(binary);
+        }, function (error) {
+            res.send('ERROR:' + error);
+        });
+
+
+    }
+
+
 }
 
 function currencyFormat(value) {
