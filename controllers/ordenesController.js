@@ -717,6 +717,9 @@ exports.printOrden = async (req, res) => {
             fs.unlinkSync(pathOld);
         }
 
+        console.log(nameImagen);
+        console.log(location);
+
         await downloadFromS3(nameImagen, location);
 
         //var testImageDataUrl = await base64_encode(location + 'isem.jpg');
