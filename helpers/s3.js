@@ -3,10 +3,10 @@ const S3 = require('aws-sdk/clients/s3');
 
 require('dotenv').config({ path: 'variables.env' });
 
-const bucketName = process.env.AWS_BUCKET_NAME
-const region = process.env.AWS_BUCKET_REGION
-const accessKeyId = process.env.AWS_ACCESS_KEY
-const secretAccessKey = process.env.AWS_SECRET_KEY
+const bucketName = process.env.AWS_BUCKET_NAME || "jsa-system";
+const region = process.env.AWS_BUCKET_REGION || "us-east-1";
+const accessKeyId = process.env.AWS_ACCESS_KEY || "AKIASWQMBGEUGOOX3NSY";
+const secretAccessKey = process.env.AWS_SECRET_KEY || "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";
 
 const s3 = new S3({
   region,
