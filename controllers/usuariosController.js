@@ -1,7 +1,62 @@
 const pool = require('../config/db');
 const helpers = require('../config/helpers');
+const { uploadFile, getFileStream } = require('../helpers/s3');
 
+
+const { v4: uuidv4 } = require('uuid');
 const moment = require('moment');
+
+
+exports.subirImgEmpl = async (req, res, next) => {
+
+    const file = req.files.file;
+
+    const { idEmpleado } = req.body;
+
+    const uuid = uuidv4();
+
+    var result = await uploadFile(file,uuid);
+
+    var key = result.Key;
+
+    if (key) {
+        await pool.query('UPDATE empleados SET imagen = ? WHERE idempleado = ?', [key, idEmpleado]);
+
+        res.send('La imágen se actualizó de forma correcta!')
+    }
+
+}
+
+exports.mostrarImgEmplRoute = async (req, res) => {
+
+    var idEmpleado = req.params.id;
+
+    const dataImg = await pool.query('SELECT imagen FROM empleados WHERE idempleado =?', idEmpleado);
+
+    for (var x = 0; x < dataImg.length; x++) {
+
+        var key = dataImg[x].imagen;
+    }
+
+    if (key) {
+
+        res.send(key);
+
+    } else {
+        res.send('empty');
+    }
+
+}
+
+exports.mostrarImgEmpl = async (req, res) => {
+
+    const key = req.params.id;
+    const readStream = getFileStream(key);
+
+    readStream.pipe(res);
+
+}
+
 
 exports.usuarios = async (req, res) => {
 
@@ -13,13 +68,13 @@ exports.usuarios = async (req, res) => {
 
     var permiso = await validAccess(idUsuario, url);
 
-    if(permiso>0){
+    if (permiso > 0) {
 
         res.render('modulos/usuarios/usuarios', {
             nombrePagina: 'Usuarios'
         });
 
-    }else{
+    } else {
 
         res.render('modulos/error/401', {
             nombrePagina: '401 Unauthorized'
@@ -35,13 +90,13 @@ exports.perfiles = async (req, res) => {
 
     var permiso = await validAccess(idUsuario, url);
 
-    if(permiso>0){
+    if (permiso > 0) {
 
         res.render('modulos/usuarios/perfiles', {
             nombrePagina: 'Perfiles'
         });
 
-    }else{
+    } else {
 
         res.render('modulos/error/401', {
             nombrePagina: '401 Unauthorized'
@@ -58,20 +113,20 @@ exports.empleados = async (req, res) => {
 
     var permiso = await validAccess(idUsuario, url);
 
-    if(permiso>0){
+    if (permiso > 0) {
 
         res.render('modulos/empleados/empleados', {
             nombrePagina: 'Empleados'
         });
 
-    }else{
+    } else {
 
         res.render('modulos/error/401', {
             nombrePagina: '401 Unauthorized'
         });
 
     }
- 
+
 }
 
 exports.agregarEmpleadoForm = async (req, res) => {
@@ -259,9 +314,9 @@ exports.editarPerfil = async (req, res) => {
         res.send('Igual');
     } else {
 
-        if(perfilRepetido.length > 0){
+        if (perfilRepetido.length > 0) {
             res.send('Repetido');
-        }else{
+        } else {
             await pool.query('UPDATE perfiles SET perfil = ? WHERE idperfil = ?', [newPerfil, idPerfil]);
             res.status(200).send('El perfil ha sido actualizado correctamente.');
         }
@@ -278,6 +333,8 @@ exports.agregarEmpleado = async (req, res) => {
         var idempleado = valFolio[x].idemp;
     }
 
+    const imagen = 'no-available.png';
+
     const newLink = {
         idempleado,
         nombre,
@@ -288,7 +345,8 @@ exports.agregarEmpleado = async (req, res) => {
         nombre_completo,
         status_empleado,
         fecha_creacion,
-        fecha_contratacion
+        fecha_contratacion,
+        imagen
     };
 
     const existEmpleado = await pool.query('SELECT * FROM empleados WHERE nombre_completo = ?', newLink.nombre_completo);
@@ -301,18 +359,18 @@ exports.agregarEmpleado = async (req, res) => {
 
         const validMail = await pool.query('SELECT * FROM empleados WHERE email = ?', newLink.email);
 
-        if(validMail.length >0){
+        if (validMail.length > 0) {
 
             res.send('CorreoRep');
 
-        }else{
+        } else {
 
             await pool.query('INSERT INTO empleados SET ?', [newLink]);
 
             res.status(200).send('Empleado Creado Correctamente!');
 
         }
-        
+
     }
 
 }
@@ -336,7 +394,7 @@ exports.mostrarEmpleados = async (req, res) => {
             conteo = x + 1;
             const arrayEmpleados = values[x];
 
-            var botones = "<div class='btn-group'><a type='button' id='btn-editar-empleado' rel='nofollow' class='btn btn-warning' href=" + "'/editar_empleado/" + arrayEmpleados.idempleado + "'" + " idEmpleado=" + "'" + arrayEmpleados.idempleado + "'" + "><i class='fas fa-pencil-alt'></i></a><button id='btn-eliminar-empleado' class='btn btn-danger' idEmpleado=" + "'" + arrayEmpleados.idempleado + "'" + "><i class='fa fa-times'></i></button></div>";
+            var botones = "<div class='btn-group'><button type='button' id='btn-imagen-empl' class='btn btn-info' data-toggle='modal' data-target='#modalSubirImagen' idEmpleado=" + "'" + arrayEmpleados.idempleado + "'" + "><i class='fas fa-image'></i></button><a type='button' id='btn-editar-empleado' rel='nofollow' class='btn btn-warning' href=" + "'/editar_empleado/" + arrayEmpleados.idempleado + "'" + " idEmpleado=" + "'" + arrayEmpleados.idempleado + "'" + "><i class='fas fa-pencil-alt'></i></a><button id='btn-eliminar-empleado' class='btn btn-danger' idEmpleado=" + "'" + arrayEmpleados.idempleado + "'" + "><i class='fa fa-times'></i></button></div>";
 
             if (arrayEmpleados.status_empleado === 0) {
                 var status = "<button type='button' id='btn-estatus-empleado' class='btn btn-danger btn-sm' estadoEmpleado='1' idEmpleado=" + "'" + arrayEmpleados.idempleado + "'" + ">Desactivado</button>";
@@ -405,37 +463,37 @@ exports.editarEmpleado = async (req, res) => {
         var fec_cont_base = moment(arrayEmpleado.fecha_contratacion).format('YYYY-MM-DD');
     }
 
-    const validMail = await pool.query('SELECT * FROM empleados WHERE email = ? AND idempleado != ?', [email,idEmpleado]);
+    const validMail = await pool.query('SELECT * FROM empleados WHERE email = ? AND idempleado != ?', [email, idEmpleado]);
 
-    if(validMail.length >0){
+    if (validMail.length > 0) {
 
         res.send('CorreoRep');
 
-    }else{
+    } else {
 
         if (nombre !== nombre_base) {
             await pool.query('UPDATE empleados SET nombre = ? WHERE idempleado = ?', [nombre, idEmpleado]);
             await pool.query('UPDATE empleados SET nombre_completo = ? WHERE idempleado = ?', [nombre_completo, idEmpleado]);
             var conteo = conteo + 1;
         }
-    
+
         if (ap_paterno !== paterno_base) {
             await pool.query('UPDATE empleados SET ap_paterno = ? WHERE idempleado = ?', [ap_paterno, idEmpleado]);
             await pool.query('UPDATE empleados SET nombre_completo = ? WHERE idempleado = ?', [nombre_completo, idEmpleado]);
             var conteo = conteo + 1;
         }
-    
+
         if (ap_materno !== materno_base) {
             await pool.query('UPDATE empleados SET ap_materno = ? WHERE idempleado = ?', [ap_materno, idEmpleado]);
             await pool.query('UPDATE empleados SET nombre_completo = ? WHERE idempleado = ?', [nombre_completo, idEmpleado]);
             var conteo = conteo + 1;
         }
-    
+
         if (email !== email_base) {
             await pool.query('UPDATE empleados SET email = ? WHERE idempleado = ?', [email, idEmpleado]);
             var conteo = conteo + 1;
         }
-    
+
         if (telefono !== telefono_base) {
             await pool.query('UPDATE empleados SET telefono = ? WHERE idempleado = ?', [telefono, idEmpleado]);
             var conteo = conteo + 1;
@@ -445,14 +503,14 @@ exports.editarEmpleado = async (req, res) => {
             await pool.query('UPDATE empleados SET fecha_contratacion = ? WHERE idempleado = ?', [fecha_contratacion, idEmpleado]);
             var conteo = conteo + 1;
         }
-    
+
         if (conteo > 0) {
-    
+
             res.send('Empleado Actualizado Correctamente');
-    
+
         } else {
             res.send('Nulos');
-    
+
         }
     }
 }
@@ -578,7 +636,7 @@ exports.mostrarUsuarios = async (req, res) => {
             conteo = x + 1;
             const arrayUsuarios = usuariosValues[x];
             var botones = "<div class='btn-group'><a type='button' id='btn-editar-usuario' class='btn btn-warning' href=" + "'/editar_usuario/" + arrayUsuarios.idusuario + "'" + " idEmpleado=" + "'" + arrayUsuarios.idusuario + "'" + "><i class='fas fa-pencil-alt'></i></a><button id='btn-eliminar-usuario' class='btn btn-danger' idUsuario=" + "'" + arrayUsuarios.idusuario + "'" + "><i class='fa fa-times'></i></button></div>";
-            
+
             if (arrayUsuarios.status_usuario > 0) {
                 var status = "<button type='button' id='btn-estatus-usuario' class='btn btn-success btn-sm' estadoUsuario='0' idUsuario=" + "'" + arrayUsuarios.idusuario + "'" + ">Activado</button>";
             } else {
@@ -586,12 +644,12 @@ exports.mostrarUsuarios = async (req, res) => {
             }
             var fechaCreacion = moment(arrayUsuarios.fecha_creacion).format('YYYY-MM-DD hh:mm:ss a');
 
-            if(arrayUsuarios.fecha_ultimologin === null){
+            if (arrayUsuarios.fecha_ultimologin === null) {
                 var fechaLogin = "";
-            }else{
+            } else {
                 var fechaLogin = moment(arrayUsuarios.fecha_ultimologin).format('YYYY-MM-DD hh:mm:ss a');
             }
-            
+
             const obj = [
                 conteo,
                 arrayUsuarios.idusuario,
@@ -623,7 +681,7 @@ exports.activarUsuario = async (req, res) => {
 
 exports.editarUsuario = async (req, res) => {
 
-    const{ idusuario, usuario, idperfil } = req.body;
+    const { idusuario, usuario, idperfil } = req.body;
 
     var conteo = 0;
 
@@ -634,23 +692,23 @@ exports.editarUsuario = async (req, res) => {
         var usuario_base = arrayUsuario.usuario;
         var idperfil_base = arrayUsuario.idperfil;
     }
-    
+
     const validUser = await pool.query('SELECT * FROM usuarios WHERE usuario = ? AND idusuario != ?', [usuario, idusuario]);
 
-    if(validUser.length > 0){
+    if (validUser.length > 0) {
 
         res.send('UsuarioRep');
 
-    }else{
+    } else {
 
-         if(usuario != usuario_base){
+        if (usuario != usuario_base) {
 
             await pool.query('UPDATE usuarios SET usuario = ? WHERE idusuario = ?', [usuario, idusuario]);
             var conteo = conteo + 1;
         }
 
 
-        if(idperfil != idperfil_base){
+        if (idperfil != idperfil_base) {
 
             await pool.query('UPDATE usuarios SET idperfil = ? WHERE idusuario = ?', [idperfil, idusuario]);
             var conteo = conteo + 1;
@@ -658,15 +716,15 @@ exports.editarUsuario = async (req, res) => {
 
 
         if (conteo > 0) {
-    
+
             res.send('Usuario Actualizado Correctamente');
-    
+
         } else {
             res.send('Nulos');
-    
+
         }
 
-    } 
+    }
 
 }
 
@@ -691,7 +749,7 @@ exports.mostrarUsuario = async (req, res) => {
     const dataUsuario = await pool.query('SELECT  a.idusuario, a.usuario, b.nombre_completo, a.status_usuario, c.perfil, c.idperfil, a.fecha_creacion, a.fecha_ultimologin FROM usuarios a INNER JOIN empleados b on a.idempleado=b.idempleado INNER JOIN perfiles c on a.idperfil=c.idperfil WHERE a.idusuario= ?', idUsuario);
 
     res.status(200).send(dataUsuario);
-    
+
 }
 
 exports.mostrarUsuariosActivos = async (req, res) => {
@@ -732,19 +790,19 @@ exports.mostrarUsuariosActivos = async (req, res) => {
     }
 }
 
-async function validAccess(idUsuario, url){
+async function validAccess(idUsuario, url) {
 
     var permiso = 0;
 
-    var idPerfilQry = await pool.query('SELECT idperfil FROM usuarios WHERE idusuario=?',idUsuario);
-    var idMenuQry = await pool.query('SELECT idmenu FROM menu WHERE url=?',url);
+    var idPerfilQry = await pool.query('SELECT idperfil FROM usuarios WHERE idusuario=?', idUsuario);
+    var idMenuQry = await pool.query('SELECT idmenu FROM menu WHERE url=?', url);
 
     var idPerfil = idPerfilQry[0].idperfil;
     var idMenu = idMenuQry[0].idmenu;
 
-    var validPermU = await pool.query('SELECT COUNT(1) as cuenta FROM permisos_xusuario WHERE idmenu=? AND idusuario=? AND acceso=1',[idMenu, idUsuario]);
-    var validPermP = await pool.query('SELECT COUNT(1) as cuenta FROM permisos_xperfil WHERE idmenu=? AND idperfil=? AND acceso=1',[idMenu,idPerfil]);
-    
+    var validPermU = await pool.query('SELECT COUNT(1) as cuenta FROM permisos_xusuario WHERE idmenu=? AND idusuario=? AND acceso=1', [idMenu, idUsuario]);
+    var validPermP = await pool.query('SELECT COUNT(1) as cuenta FROM permisos_xperfil WHERE idmenu=? AND idperfil=? AND acceso=1', [idMenu, idPerfil]);
+
     var permiso = permiso + validPermU[0].cuenta + validPermP[0].cuenta;
 
     return permiso

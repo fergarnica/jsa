@@ -766,7 +766,7 @@ IMPRIMIR ORDENES
 =============================================*/
 $(document).on("click", "#btn-imprimir-orden", function () {
 
-    $('#btn-imprimir-orden').html('<span id="loading" class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span> Print...').addClass('disabled');
+    //$(this).attr("idOrden").html('<span id="loading" class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span> Print...').addClass('disabled');
 
     var payload = {};
 
@@ -781,7 +781,7 @@ $(document).on("click", "#btn-imprimir-orden", function () {
 
             if (data.length > 0) {
 
-                $('#btn-imprimir-orden').html('<i class="fa fa-print"></i> Imprimir').removeClass('disabled');
+                //$(this).attr("idOrden").html('<i class="fa fa-print"></i>').removeClass('disabled');
 
                 var type = 'application/pdf';
                 const blobURL = URL.createObjectURL(pdfBlobConversion(data, type));
@@ -804,7 +804,7 @@ $(document).on("click", "#btn-imprimir-orden", function () {
 
             }
 
-        }).catch(() => {
+        }) .catch(() => {
             Swal.fire({
                 icon: 'error',
                 title: 'Hubo un error',
@@ -816,7 +816,8 @@ $(document).on("click", "#btn-imprimir-orden", function () {
             });
         });
 
-})
+});
+
 //converts base64 to blob type for windows
 function pdfBlobConversion(b64Data, contentType) {
     contentType = contentType || '';

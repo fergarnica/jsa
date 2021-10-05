@@ -12,6 +12,7 @@
   "author": "Fernando Garnica",
   "license": "ISC",
   "dependencies": {
+    "aws-sdk": "^2.998.0",
     "axios": "^0.21.4",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
@@ -20,6 +21,7 @@
     "dotenv": "^10.0.0",
     "exceljs": "^4.2.0",
     "express": "^4.17.1",
+    "express-fileupload": "^1.2.1",
     "express-handlebars": "^5.3.3",
     "express-mysql-session": "^2.1.7",
     "express-session": "^1.17.2",
@@ -30,6 +32,7 @@
     "inputmask": "^5.0.6",
     "jquery": "^3.6.0",
     "moment": "^2.29.1",
+    "multer": "^1.4.3",
     "mysql": "^2.18.1",
     "passport": "^0.4.1",
     "passport-local": "^1.0.0",

@@ -14,6 +14,7 @@ const formNewUser = document.getElementById('formNewUser');
 const formEditUser = document.getElementById('formEditUser');
 const formNewEmpleado = document.getElementById('formNewEmpleado');
 const formEditEmpleado = document.getElementById('formEditEmpleado');
+const formUploadImg = document.getElementById('formUploadImg');
 
 const tblPerfiles = document.querySelector('#tbl-perfiles');
 const tblEmpleados = document.querySelector('#tbl-empleados');
@@ -280,7 +281,7 @@ const tblUsuarios = document.querySelector('#tbl-usuarios');
         });
     }
 
-    if(fecContEdit){
+    if (fecContEdit) {
         $('#fecContEdit').datepicker({
             format: "dd/mm/yyyy",
             language: 'es',
@@ -741,7 +742,7 @@ if (formNewUser) {
         }
 
     });
-} 
+}
 /*=============================================
 Editar Usuario
 =============================================*/
@@ -1085,7 +1086,7 @@ if (formEditEmpleado) {
             var email = respuesta.data[0].email;
             var telefono = respuesta.data[0].telefono;
             var fecha_contratacion = moment(respuesta.data[0].fecha_contratacion).format('DD/MM/YYYY');;
-            
+
             $("#idEmpleado").val(idEmpleado);
             $("#empNombreEdit").val(nombre);
             $("#empPatEdit").val(ap_paterno);
@@ -1355,8 +1356,6 @@ $(document).on("click", "#btn-eliminar-usuario", function () {
 
             var route = '/usuarios/' + idUsuario;
 
-            console.log(route);
-
             axios.delete(route)
                 .then(function (respuesta) {
                     //console.log(respuesta);
@@ -1383,6 +1382,134 @@ $(document).on("click", "#btn-eliminar-usuario", function () {
 });
 
 /*=============================================
+SUBIENDO LA FOTO DEL EMPLEADO
+=============================================*/
+$("#imgEmpleado").change(function () {
+
+    var imagen = this.files[0];
+
+    /*=============================================
+        VALIDAMOS EL FORMATO DE LA IMAGEN SEA JPG O PNG
+        =============================================*/
+
+    if (imagen["type"] != "image/jpeg" && imagen["type"] != "image/png") {
+
+        $("#imgEmpleado").val("");
+
+        swal({
+            title: "Error al subir la imagen",
+            text: "¡La imagen debe estar en formato JPG o PNG!",
+            type: "error",
+            confirmButtonText: "¡Cerrar!"
+        });
+
+    } else if (imagen["size"] > 2000000) {
+
+        $("#imgEmpleado").val("");
+
+        swal({
+            title: "Error al subir la imagen",
+            text: "¡La imagen no debe pesar más de 2MB!",
+            type: "error",
+            confirmButtonText: "¡Cerrar!"
+        });
+
+    } else {
+
+        var datosImagen = new FileReader;
+        datosImagen.readAsDataURL(imagen);
+
+        $(datosImagen).on("load", function (event) {
+
+            var rutaImagen = event.target.result;
+
+            $("#previsualizar").attr("src", rutaImagen);
+
+        })
+
+    }
+})
+
+/*=============================================
+Subir/Cambiar Imagen
+=============================================*/
+$(document).on("click", "#btn-imagen-empl", function () {
+
+    var idEmpleado = $(this).attr("idEmpleado");
+
+    $("#idEmpleado").val(idEmpleado);
+
+    var route = '/empleados/route_imagen/' + idEmpleado;
+
+    axios.get(route)
+        .then(function (respuesta) {
+
+            console.log(respuesta.data);
+            if(respuesta.data != 'empty'){
+                
+                var rutaImagen = '/empleados/imagen/' + respuesta.data;
+
+                $("#previsualizar").attr("src", rutaImagen);
+
+            }
+
+        })
+
+});
+
+if (formUploadImg) {
+
+    formUploadImg.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const idEmpleado = document.getElementById('idEmpleado').value;
+        const file = document.querySelector('#imgEmpleado').files[0];
+
+        const formData = new FormData();
+
+        formData.append('idEmpleado', idEmpleado);
+        formData.append('file', file);
+
+        uploadFile(formData);
+
+    })
+}
+
+const uploadFile = (formData) => {
+
+    axios.post('/empleados/uploadImg', formData)
+        .then(function (respuesta) {
+
+            if (respuesta.data) {
+
+                $('#modalSubirImagen').modal('dispose');
+
+                Swal.fire(
+                    'Imágen Actualizada!',
+                    respuesta.data,
+                    'success'
+                ).then(function (result) {
+                    if (result.value) {
+                        window.location = "/empleados";
+                    }
+                });    
+
+            }
+        }).catch(errors => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Hubo un error',
+                text: 'Error en la Base de Datos'
+            })
+        }).then(function (result) {
+            if (result.value) {
+                window.location = "/empleados";
+            }
+        }); 
+
+};
+
+/*=============================================
 FUNCIONES
 =============================================*/
 function validarEmail(elemento) {
@@ -1396,3 +1523,4 @@ function validarEmail(elemento) {
     }
 
 }
+

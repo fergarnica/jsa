@@ -8,6 +8,7 @@ const usuariosController = require('../controllers/usuariosController');
 const ordenesController = require('../controllers/ordenesController');
 
 const { isLoggedIn, isNotLogeedIn } = require('../config/auth');
+const { verifyFile } = require('../middlewares/verifyFile');
 
 module.exports = function () {
 
@@ -137,6 +138,18 @@ module.exports = function () {
     router.delete('/empleados/:id',
         isLoggedIn,
         usuariosController.eliminarEmpleado
+    );
+    router.post('/empleados/uploadImg',
+        isLoggedIn,
+        usuariosController.subirImgEmpl
+    );
+    router.get('/empleados/route_imagen/:id',
+        isLoggedIn,
+        usuariosController.mostrarImgEmplRoute
+    );
+    router.get('/empleados/imagen/:id',
+        isLoggedIn,
+        usuariosController.mostrarImgEmpl
     );
 
     //Perfiles

@@ -12,6 +12,8 @@ var createError = require('http-errors');
 const { database } = require('./config/keys');
 const passport = require('./config/passport');
 
+const fileUpload = require('express-fileupload');
+
 require('dotenv').config({ path: 'variables.env' });
 
 /*=============================================
@@ -57,6 +59,12 @@ app.use(session({
     secure: false
   } */
 }));
+
+app.use(fileUpload({
+  useTempFiles : true,
+  tempFileDir : '/tmp/'
+}));
+
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());

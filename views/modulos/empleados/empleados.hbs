@@ -46,3 +46,43 @@
     </section>
     <!-- /.content -->
 </div>
+
+<!--=====================================
+MODAL AGREGAR IMAGEN
+======================================-->
+<div class="modal fade" id="modalSubirImagen" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background:#336699; color:white">
+                <h5 class="modal-title" id="exampleModalLabel">Agregar/Cambiar Imagen de Empleado</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="formUploadImg">
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <label for="recipient-name" class="col-form-label">ID Empleado:</label>
+                        <input type="number" class="form-control" id="idEmpleado" readonly="readonly" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="formFile" class="form-label">Imagen del empleado:</label>
+                        <input class="form-control" type="file" id="imgEmpleado" name="imagen"
+                            placeholder="Select file" required>
+                        <p>
+                            <small>Peso máximo de la imagen 2MB</small>
+                        </p>
+                        <img class="img-thumbnail" id="previsualizar" width="100px">
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Salir</button>
+                    <button type="submit" id="btnUpImg" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
