@@ -198,7 +198,8 @@ exports.mostrarOrdenes = async (req, res) => {
                     array.cp_mnpio,
                     array.rfc,
                     array.ubicacion,
-                    buttonAsig
+                    buttonAsig,
+                    buttonArchiv
                 ];
 
                 dataset.push(obj);
@@ -215,6 +216,8 @@ exports.mostrarOrdenes = async (req, res) => {
 
                 var buttonPrint = "<div class='btn-group'><button type='button' id='btn-imprimir-orden' class='btn btn-info' ' urlimage=" + "'" + array.imagen + "'' idOrden=" + "'" + array.idorden + "'" + "><i class='fas fa-print'></i></button></div>";
 
+                var buttonArchiv = "<div class='btn-group'><button type='button' id='btn-archivar-orden' class='btn btn-success' data-toggle='modal' data-target='#modalArchivarOrden' idOrden=" + "'" + array.idorden + "'" + "><i class='fas fa-archive'></i></button></div>";
+
                 var fechaProg = moment(array.fecha_prog).format('DD/MM/YYYY');
 
                 const obj = [
@@ -229,7 +232,8 @@ exports.mostrarOrdenes = async (req, res) => {
                     array.num_orden,
                     array.nombre_verif,
                     fechaProg,
-                    buttonPrint
+                    buttonPrint,
+                    buttonArchiv
                 ];
 
                 dataset.push(obj);
@@ -237,6 +241,30 @@ exports.mostrarOrdenes = async (req, res) => {
 
             res.send(dataset);
 
+        }else if (idstatus_orden == 0){
+
+            for (var x = 0; x < results.length; x++) {
+
+                const array = results[x];
+                conteo = x + 1;
+
+                const obj = [
+                    conteo,
+                    array.oficina,
+                    array.nombre_completo,
+                    array.actividad,
+                    array.giro,
+                    array.cp_mnpio,
+                    array.rfc,
+                    array.ubicacion,
+                    array.status_orden
+                ];
+
+                dataset.push(obj);
+            }
+
+            res.send(dataset);
+            
         }
 
     }
@@ -325,10 +353,14 @@ exports.consultarAgenda = async (req, res) => {
 
             const array = results[x];
 
-            var fechaProg = moment(array.fecha_prog).format('DD/MM/YYYY');
+            if(array.fecha_captura == null){
+                var fechaProg = '-------';
+            }else{
+                var fechaProg = moment(array.fecha_captura).format('DD/MM/YYYY');
+            }
 
             const obj = [
-                array.num_orden,
+                //array.num_orden,
                 array.oficina,
                 array.nombre_completo,
                 array.actividad,
@@ -372,7 +404,11 @@ exports.exportAgenda = async (req, res) => {
 
             const array = results[x];
 
-            var fechaProg = moment(array.fecha_prog).format('DD/MM/YYYY');
+            if(array.fecha_captura == null){
+                var fechaProg = '-------';
+            }else{
+                var fechaProg = moment(array.fecha_captura).format('DD/MM/YYYY');
+            }
 
             const obj = {
                 num_orden: array.num_orden,
@@ -401,15 +437,15 @@ exports.exportAgenda = async (req, res) => {
         var worksheet = workbook.addWorksheet('Agenda');
 
         worksheet.columns = [
-            { header: 'NO.', width: 10 },
+            /* { header: 'NO.', width: 10 }, */
             { header: 'Oficina', width: 10 },
-            { header: 'Verificador', width: 40 },
+            { header: 'Censador', width: 40 },
             { header: 'Actividad', width: 25 },
             { header: 'Giro', width: 32 },
             { header: 'Municipio', width: 25 },
             { header: 'RFC', width: 25 },
             { header: 'Ubicación', width: 15 },
-            { header: 'Fecha Prog.', width: 25 }
+            { header: 'Fecha Reg.', width: 25 }
         ];
 
         // set cell alignment to top-left, middle-center, bottom-right
@@ -421,7 +457,7 @@ exports.exportAgenda = async (req, res) => {
         worksheet.getCell('F1').alignment = { vertical: 'middle', horizontal: 'center' };
         worksheet.getCell('G1').alignment = { vertical: 'middle', horizontal: 'center' };
         worksheet.getCell('H1').alignment = { vertical: 'middle', horizontal: 'center' };
-        worksheet.getCell('I1').alignment = { vertical: 'middle', horizontal: 'center' };
+        //worksheet.getCell('I1').alignment = { vertical: 'middle', horizontal: 'center' };
         // for the wannabe graphic designers out there
         worksheet.getCell('A1').font = { bold: true };
         worksheet.getCell('B1').font = { bold: true };
@@ -431,7 +467,7 @@ exports.exportAgenda = async (req, res) => {
         worksheet.getCell('F1').font = { bold: true };
         worksheet.getCell('G1').font = { bold: true };
         worksheet.getCell('H1').font = { bold: true };
-        worksheet.getCell('I1').font = { bold: true };
+        //worksheet.getCell('I1').font = { bold: true };
 
         // set single thin border around
         worksheet.getCell('A1').border = {
@@ -490,12 +526,12 @@ exports.exportAgenda = async (req, res) => {
             right: { style: 'thin' }
         };
 
-        worksheet.getCell('I1').border = {
+        /* worksheet.getCell('I1').border = {
             top: { style: 'thin' },
             left: { style: 'thin' },
             bottom: { style: 'thin' },
             right: { style: 'thin' }
-        };
+        }; */
 
         var i;
 
@@ -504,7 +540,7 @@ exports.exportAgenda = async (req, res) => {
             const row = worksheet.getRow(2 + i);
             const ordenes = dataOrds[i];
 
-            row.getCell(1).value = ordenes.num_orden;
+            row.getCell(1).value = ordenes.oficina;
             row.getCell(1).alignment = { vertical: 'middle', horizontal: 'center' };
             row.getCell(1).border = {
                 top: { style: 'thin' },
@@ -512,7 +548,7 @@ exports.exportAgenda = async (req, res) => {
                 bottom: { style: 'thin' },
                 right: { style: 'thin' }
             };
-            row.getCell(2).value = ordenes.oficina;
+            row.getCell(2).value = ordenes.nombre_completo;
             row.getCell(2).alignment = { vertical: 'middle', horizontal: 'center' };
             row.getCell(2).border = {
                 top: { style: 'thin' },
@@ -520,7 +556,7 @@ exports.exportAgenda = async (req, res) => {
                 bottom: { style: 'thin' },
                 right: { style: 'thin' }
             };
-            row.getCell(3).value = ordenes.nombre_completo;
+            row.getCell(3).value = ordenes.actividad;
             row.getCell(3).alignment = { vertical: 'middle', horizontal: 'center' };
             row.getCell(3).border = {
                 top: { style: 'thin' },
@@ -528,7 +564,7 @@ exports.exportAgenda = async (req, res) => {
                 bottom: { style: 'thin' },
                 right: { style: 'thin' }
             };
-            row.getCell(4).value = ordenes.actividad;
+            row.getCell(4).value = ordenes.giro;
             row.getCell(4).alignment = { vertical: 'middle', horizontal: 'center' };
             row.getCell(4).border = {
                 top: { style: 'thin' },
@@ -536,7 +572,7 @@ exports.exportAgenda = async (req, res) => {
                 bottom: { style: 'thin' },
                 right: { style: 'thin' }
             };
-            row.getCell(5).value = ordenes.giro;
+            row.getCell(5).value = ordenes.mnpio;
             row.getCell(5).alignment = { vertical: 'middle', horizontal: 'center' };
             row.getCell(5).border = {
                 top: { style: 'thin' },
@@ -544,7 +580,7 @@ exports.exportAgenda = async (req, res) => {
                 bottom: { style: 'thin' },
                 right: { style: 'thin' }
             };
-            row.getCell(6).value = ordenes.mnpio;
+            row.getCell(6).value = ordenes.rfc;
             row.getCell(6).alignment = { vertical: 'middle', horizontal: 'center' };
             row.getCell(6).border = {
                 top: { style: 'thin' },
@@ -552,7 +588,7 @@ exports.exportAgenda = async (req, res) => {
                 bottom: { style: 'thin' },
                 right: { style: 'thin' }
             };
-            row.getCell(7).value = ordenes.rfc;
+            row.getCell(7).value = ordenes.ubicacion;
             row.getCell(7).alignment = { vertical: 'middle', horizontal: 'center' };
             row.getCell(7).border = {
                 top: { style: 'thin' },
@@ -560,7 +596,7 @@ exports.exportAgenda = async (req, res) => {
                 bottom: { style: 'thin' },
                 right: { style: 'thin' }
             };
-            row.getCell(8).value = ordenes.ubicacion;
+            row.getCell(8).value = ordenes.fecha;
             row.getCell(8).alignment = { vertical: 'middle', horizontal: 'center' };
             row.getCell(8).border = {
                 top: { style: 'thin' },
@@ -568,14 +604,14 @@ exports.exportAgenda = async (req, res) => {
                 bottom: { style: 'thin' },
                 right: { style: 'thin' }
             };
-            row.getCell(9).value = ordenes.fecha;
+            /* row.getCell(9).value = ordenes.fecha;
             row.getCell(9).alignment = { vertical: 'middle', horizontal: 'center' };
             row.getCell(9).border = {
                 top: { style: 'thin' },
                 left: { style: 'thin' },
                 bottom: { style: 'thin' },
                 right: { style: 'thin' }
-            };
+            }; */
             row.commit();
 
         }

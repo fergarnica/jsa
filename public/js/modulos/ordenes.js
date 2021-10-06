@@ -204,6 +204,10 @@ if (formSegOrdenes) {
 
         var statusOrd = document.getElementById('statusOrd').value;
 
+        if (statusOrd == "") {
+            var statusOrd = 0;
+        }
+
         payload.idstatus_orden = statusOrd;
 
         axios.post('/seguimiento_ordenes', payload)
@@ -394,10 +398,96 @@ if (formSegOrdenes) {
                                 },
                                 {
                                     title: "Imprimir"
+                                },
+                                {
+                                    title: "Cerrar"
                                 }
                                 ]
                             });
                         }
+
+                    } else if (statusOrd == 0) {
+
+                        if (tblOrdenes) {
+
+                            $(tblOrdenes).DataTable({
+                                data: dataSet,
+                                deferRender: true,
+                                iDisplayLength: 50,
+                                retrieve: true,
+                                processing: true,
+                                fixedHeader: true,
+                                responsive: true,
+                                searching: false,
+                                columnDefs: [{
+                                    targets: "_all",
+                                    sortable: false
+                                }],
+                                language: {
+
+                                    "sProcessing": "Procesando...",
+                                    "sLengthMenu": "Mostrar _MENU_ registros",
+                                    "sZeroRecords": "No se encontraron resultados",
+                                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_",
+                                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0",
+                                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                                    "sInfoPostFix": "",
+                                    "sSearch": "Buscar:",
+                                    "sUrl": "",
+                                    "sInfoThousands": ",",
+                                    "sLoadingRecords": "Cargando...",
+                                    "oPaginate": {
+                                        "sFirst": "Primero",
+                                        "sLast": "Último",
+                                        "sNext": "Siguiente",
+                                        "sPrevious": "Anterior"
+                                    },
+                                    "oAria": {
+                                        "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                                        "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                                    }
+
+                                },
+                                createdRow: function (row, data, dataIndex) {
+                                    var idpadre = data[4];
+                                    //Pintar toda la columna
+                                    if (idpadre == 0) {
+                                        $('td', row).css('background-color', '#D6EAF8');
+                                        $(row).find('td:eq(2)').css('font-weight', 'bold');
+                                    }
+                                },
+                                columns: [{
+                                    title: "#"
+                                },
+                                {
+                                    title: "Oficina"
+                                },
+                                {
+                                    title: "Censador"
+                                },
+                                {
+                                    title: "Actividad"
+                                },
+                                {
+                                    title: "Giro"
+                                },
+                                {
+                                    title: "Municipio"
+                                },
+                                {
+                                    title: "RFC"
+                                },
+                                {
+                                    title: "Ubicación"
+                                },
+                                {
+                                    title: "Estatus"
+                                }
+                                ]
+                            });
+                        }
+
 
                     }
 
@@ -440,38 +530,44 @@ ASIGNAR ORDEN
 =============================================*/
 $(document).on("click", "#btn-asignar-orden", function () {
 
-    var idOrden = $(this).attr("idOrden");
+    var selectVer = document.getElementById("selAsigVer").length;
 
-    $("#idOrdenAsig").val(idOrden);
+    if (selectVer == 1) {
 
-    var payload = {};
-    payload.status = 1;
+        var idOrden = $(this).attr("idOrden");
 
-    var route = '/verificadores/all';
+        $("#idOrdenAsig").val(idOrden);
 
-    axios.post(route, payload)
-        .then(function (respuesta) {
+        var payload = {};
+        payload.status = 1;
 
-            var dataVerif = respuesta.data;
+        var route = '/verificadores/all';
 
-            dataVerif.forEach(function (valor, indice, array) {
+        axios.post(route, payload)
+            .then(function (respuesta) {
 
-                var idVerif = valor[1];
-                var verificador = valor[2];
+                var dataVerif = respuesta.data;
 
-                $("<option />")
-                    .attr("value", idVerif)
-                    .html(verificador)
-                    .appendTo("#selAsigVer");
-            });
+                dataVerif.forEach(function (valor, indice, array) {
 
-        }).catch(errors => {
-            Swal.fire({
-                icon: 'error',
-                title: 'Hubo un error',
-                text: 'Error en la Base de Datos'
+                    var idVerif = valor[1];
+                    var verificador = valor[2];
+
+                    $("<option />")
+                        .attr("value", idVerif)
+                        .html(verificador)
+                        .appendTo("#selAsigVer");
+                });
+
+            }).catch(errors => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Hubo un error',
+                    text: 'Error en la Base de Datos'
+                })
             })
-        })
+    }
+
 });
 
 if (formAsigOrden) {
@@ -655,33 +751,33 @@ if (formAgenOrd) {
                                     $(row).find('td:eq(2)').css('font-weight', 'bold');
                                 }
                             },
-                            columns: [{
+                            columns: [/* {
                                 title: "# Orden"
-                            },
-                            {
-                                title: "Oficina"
-                            },
-                            {
-                                title: "Verificador"
-                            },
-                            {
-                                title: "Actividad"
-                            },
-                            {
-                                title: "Giro"
-                            },
-                            {
-                                title: "Municipio"
-                            },
-                            {
-                                title: "RFC"
-                            },
-                            {
-                                title: "Ubicación"
-                            },
-                            {
-                                title: "Fecha Prog."
-                            }
+                            }, */
+                                {
+                                    title: "Oficina"
+                                },
+                                {
+                                    title: "Censador"
+                                },
+                                {
+                                    title: "Actividad"
+                                },
+                                {
+                                    title: "Giro"
+                                },
+                                {
+                                    title: "Municipio"
+                                },
+                                {
+                                    title: "RFC"
+                                },
+                                {
+                                    title: "Ubicación"
+                                },
+                                {
+                                    title: "Fecha Reg."
+                                }
                             ]
                         });
                     }
@@ -804,7 +900,7 @@ $(document).on("click", "#btn-imprimir-orden", function () {
 
             }
 
-        }) .catch(() => {
+        }).catch(() => {
             Swal.fire({
                 icon: 'error',
                 title: 'Hubo un error',

@@ -2,8 +2,24 @@ const pool = require('../config/db');
 
 exports.home = async (req, res) => {
 
+    var idusuario = res.locals.usuario.idusuario;
+
+    var user = await pool.query('SELECT a.nombre FROM empleados a INNER JOIN usuarios b on a.idempleado=b.idempleado WHERE b.idusuario= ?', idusuario);
+    var totVerif = await pool.query('SELECT COUNT(idverificador) AS total_verif FROM verificadores WHERE status=1');
+    var totOrds = await pool.query('SELECT COUNT(idorden) AS total_ords FROM ordenes');
+    var totOrdsAb = await pool.query('SELECT COUNT(idorden) AS total_ords_ab FROM ordenes WHERE idstatus_orden=1');
+
+    nombre = user[0].nombre.toUpperCase();
+    totalVerif = totVerif[0].total_verif;
+    totalOrdenes = totOrds[0].total_ords;
+    totalOrdenesAb = totOrdsAb[0].total_ords_ab;
+
     res.render('index', {
-        nombrePagina: 'Inicio'
+        nombrePagina: 'Inicio',
+        nombre,
+        totalVerif,
+        totalOrdenes,
+        totalOrdenesAb
     });
 
 }

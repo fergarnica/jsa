@@ -30,14 +30,17 @@
           <!-- small box -->
           <div class="small-box bg-info">
             <div class="inner">
-              <h3>{{ totalProd }}</h3>
+              <h3></h3>
+              <br>
+              <p></p>
+              <p></p>
 
-              <p>Productos</p>
+              <p>Nueva Orden</p>
             </div>
             <div class="icon">
-              <i class="ion ion-ios-barcode"></i>
+              <i class="ion ion-ios-plus"></i>
             </div>
-            <a href="/productos" class="small-box-footer">Detalle <i class="fas fa-arrow-circle-right"></i></a>
+            <a href="/capturar_orden" class="small-box-footer">Ir <i class="fas fa-arrow-circle-right"></i></a>
           </div>
         </div>
         <!-- ./col -->
@@ -45,14 +48,14 @@
           <!-- small box -->
           <div class="small-box bg-success">
             <div class="inner">
-              <h3>{{ totalVtas }}{{!-- <sup style="font-size: 20px">%</sup> --}}</h3>
+              <h3>{{ totalOrdenes }}{{!-- <sup style="font-size: 20px">%</sup> --}}</h3>
 
-              <p>Ventas</p>
+              <p>Ordenes</p>
             </div>
             <div class="icon">
-              <i class="ion ion-bag"></i>
+              <i class="ion ion-clipboard"></i>
             </div>
-            <a href="/admin_ventas" class="small-box-footer">Detalle <i class="fas fa-arrow-circle-right"></i></a>
+            <a href="/seguimiento_ordenes" class="small-box-footer">Detalle <i class="fas fa-arrow-circle-right"></i></a>
           </div>
         </div>
         <!-- ./col -->
@@ -60,14 +63,14 @@
           <!-- small box -->
           <div class="small-box bg-warning">
             <div class="inner">
-              <h3>{{ totalCli }}</h3>
+              <h3>{{ totalVerif }}</h3>
 
-              <p>Clientes</p>
+              <p>Verificadores</p>
             </div>
             <div class="icon">
               <i class="ion ion-person-add"></i>
             </div>
-            <a href="/clientes" class="small-box-footer">Detalle <i class="fas fa-arrow-circle-right"></i></a>
+            <a href="/verificadores" class="small-box-footer">Detalle <i class="fas fa-arrow-circle-right"></i></a>
           </div>
         </div>
         <!-- ./col -->
@@ -75,14 +78,14 @@
           <!-- small box -->
           <div class="small-box bg-danger">
             <div class="inner">
-              <h3>{{ totalProvs }}</h3>
+              <h3>{{ totalOrdenesAb }}</h3>
 
-              <p>Proveedores</p>
+              <p>Ordenes Abiertas / Agenda</p>
             </div>
             <div class="icon">
-              <i class="ion ion-clipboard"></i>
+              <i class="ion ion-calendar"></i>
             </div>
-            <a href="/proveedores" class="small-box-footer">Detalle <i class="fas fa-arrow-circle-right"></i></a>
+            <a href="/agenda_ordenes" class="small-box-footer">Detalle <i class="fas fa-arrow-circle-right"></i></a>
           </div>
         </div>
         <!-- ./col -->
