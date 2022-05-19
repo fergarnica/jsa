@@ -6,6 +6,7 @@ const formNewOrden = document.getElementById('formNewOrden');
 const formSegOrdenes = document.getElementById('formSegOrdenes');
 const formAsigOrden = document.getElementById('formAsigOrden');
 const formAgenOrd = document.getElementById('formAgenOrd');
+const formCerrarOrden = document.getElementById('formCerrarOrden');
 
 const fecOrden = document.getElementById("fecOrden");
 const statusOrd = document.getElementById('statusOrd');
@@ -172,7 +173,7 @@ CONSULTAR ORDENES
 =============================================*/
 if (formSegOrdenes) {
 
-    axios.get('/estatus_ordenes', payload)
+    axios.get('/estatus_ordenes')
         .then(function (respuesta) {
 
             var dataStatus = respuesta.data;
@@ -489,6 +490,91 @@ if (formSegOrdenes) {
                         }
 
 
+                    } else {
+
+                        if (tblOrdenes) {
+
+                            $(tblOrdenes).DataTable({
+                                data: dataSet,
+                                deferRender: true,
+                                iDisplayLength: 50,
+                                retrieve: true,
+                                processing: true,
+                                fixedHeader: true,
+                                responsive: true,
+                                searching: false,
+                                columnDefs: [{
+                                    targets: "_all",
+                                    sortable: false
+                                }],
+                                language: {
+
+                                    "sProcessing": "Procesando...",
+                                    "sLengthMenu": "Mostrar _MENU_ registros",
+                                    "sZeroRecords": "No se encontraron resultados",
+                                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_",
+                                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0",
+                                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                                    "sInfoPostFix": "",
+                                    "sSearch": "Buscar:",
+                                    "sUrl": "",
+                                    "sInfoThousands": ",",
+                                    "sLoadingRecords": "Cargando...",
+                                    "oPaginate": {
+                                        "sFirst": "Primero",
+                                        "sLast": "Último",
+                                        "sNext": "Siguiente",
+                                        "sPrevious": "Anterior"
+                                    },
+                                    "oAria": {
+                                        "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                                        "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                                    }
+
+                                },
+                                createdRow: function (row, data, dataIndex) {
+                                    var idpadre = data[4];
+                                    //Pintar toda la columna
+                                    if (idpadre == 0) {
+                                        $('td', row).css('background-color', '#D6EAF8');
+                                        $(row).find('td:eq(2)').css('font-weight', 'bold');
+                                    }
+                                },
+                                columns: [{
+                                    title: "#"
+                                },
+                                {
+                                    title: "Oficina"
+                                },
+                                {
+                                    title: "Censador"
+                                },
+                                {
+                                    title: "Actividad"
+                                },
+                                {
+                                    title: "Giro"
+                                },
+                                {
+                                    title: "Municipio"
+                                },
+                                {
+                                    title: "RFC"
+                                },
+                                {
+                                    title: "Ubicación"
+                                },
+                                {
+                                    title: "Estatus"
+                                },
+                                {
+                                    title: "Observaciones"
+                                }
+                                ]
+                            });
+                        }
+
                     }
 
                 } else {
@@ -530,13 +616,13 @@ ASIGNAR ORDEN
 =============================================*/
 $(document).on("click", "#btn-asignar-orden", function () {
 
+    var idOrden = $(this).attr("idOrden");
+
+    $("#idOrdenAsig").val(idOrden);
+
     var selectVer = document.getElementById("selAsigVer").length;
 
     if (selectVer == 1) {
-
-        var idOrden = $(this).attr("idOrden");
-
-        $("#idOrdenAsig").val(idOrden);
 
         var payload = {};
         payload.status = 1;
@@ -824,7 +910,6 @@ $(document).on("click", "#btn-export-agenda", function () {
     }).then(function (respuesta) {
 
         var data = respuesta.data;
-        console.log(data);
 
         $('#btn-export-agenda').html('<i class="fa fa-file-excel"></i> Exportar').removeClass('disabled');
 
@@ -862,16 +947,18 @@ IMPRIMIR ORDENES
 =============================================*/
 $(document).on("click", "#btn-imprimir-orden", function () {
 
-    //$(this).attr("idOrden").html('<span id="loading" class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span> Print...').addClass('disabled');
-
     var payload = {};
 
     var idOrden = $(this).attr("idOrden");
 
     payload.idorden = idOrden;
 
+    openLoading();
+
     axios.post('/print_orden', payload)
         .then(function (respuesta) {
+
+            closeLoading();
 
             var data = respuesta.data;
 
@@ -914,6 +1001,119 @@ $(document).on("click", "#btn-imprimir-orden", function () {
 
 });
 
+/*=============================================
+CERRAR ORDENES
+=============================================*/
+$(document).on("click", "#btn-archivar-orden", function () {
+
+    var idOrden = $(this).attr("idOrden");
+    $("#idOrdenClose").val(idOrden);
+
+    var selCloseStatus = document.getElementById("selCloseStatus").length;
+
+    var routeUno = '/estatus_ordenes_cerrar';
+    var routeDos = '/info_orden/' + idOrden;
+
+    const requestUno = axios.get(routeUno);
+    const requestDos = axios.get(routeDos);
+
+    axios.all([requestUno, requestDos]).then(axios.spread((...respuesta) => {
+
+        if (respuesta.length > 0) {
+
+            const responseUno = respuesta[0];
+            const responseDos = respuesta[1];
+
+            if (selCloseStatus == 1) {
+
+                if (responseUno.data.length > 0) {
+
+                    var dataStatus = responseUno.data;
+
+                    dataStatus.forEach(function (valor, indice, array) {
+
+                        var idStat = valor[1];
+                        var statusDesc = valor[2];
+
+                        $("<option />")
+                            .attr("value", idStat)
+                            .html(statusDesc)
+                            .appendTo("#selCloseStatus");
+                    });
+                }
+            }
+
+            if (responseDos.data.length > 0) {
+
+                var dataOrden = responseDos.data[0];
+
+                var numOrden = dataOrden.num_orden;
+
+                $("#numOrdenClose").val(numOrden);
+
+            }
+
+        }
+
+    })).catch(errors => {
+        Swal.fire({
+            icon: 'error',
+            title: 'Hubo un error',
+            text: 'Error en la Base de Datos'
+        })
+    });
+
+
+});
+
+if (formCerrarOrden) {
+
+    formCerrarOrden.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        var payload = {};
+
+        var idOrden = document.getElementById('idOrdenClose').value;
+        var selStatus = document.getElementById('selCloseStatus').value;
+        var obsCierre = document.getElementById('obsCierre').value;
+
+        payload.idorden = idOrden;
+        payload.idstatus_orden = selStatus;
+        payload.orden_obs = obsCierre;
+        payload.fecha_cierre = moment().format('YYYY-MM-DD H:mm:ss');
+
+        axios.post('/cerrar_orden', payload)
+            .then(function (respuesta) {
+
+                $('#modalArchivarOrden').modal('dispose');
+
+                // Alerta
+                Swal.fire(
+                    'Orden Cerrada!',
+                    respuesta.data,
+                    'success'
+                ).then(function (result) {
+                    if (result.value) {
+                        window.location = "/seguimiento_ordenes";
+                    }
+                });
+
+
+            }).catch(errors => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Hubo un error',
+                    text: 'Error en la Base de Datos'
+                })
+            }).then(function (result) {
+                if (result.value) {
+                    window.location = "/seguimiento_ordenes";
+                }
+            });;
+
+    })
+}
+
 //converts base64 to blob type for windows
 function pdfBlobConversion(b64Data, contentType) {
     contentType = contentType || '';
@@ -938,4 +1138,12 @@ function pdfBlobConversion(b64Data, contentType) {
 
     var blob = new Blob(byteArrays, { type: contentType });
     return blob;
+}
+
+function openLoading() {
+    $('#modal-loading').modal('show');
+}
+
+function closeLoading() {
+    $('#modal-loading').modal('hide');
 }

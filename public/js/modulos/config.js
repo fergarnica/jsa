@@ -632,7 +632,7 @@ if (formNewOficina) {
 
         axios.post('/oficinas', payload)
             .then(function (respuesta) {
-                console.log(respuesta);
+
                 if (respuesta.data == 'Repetido') {
 
                     $('#modalAgregarOficina').modal('dispose');

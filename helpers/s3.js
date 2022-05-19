@@ -28,9 +28,9 @@ function uploadFile(file, uuid) {
     Key: nameFile
   }
 
-  return s3.upload(uploadParams).promise()
-}
+  return s3.upload(uploadParams).promise();
 
+}
 // downloads a file from s3
 function getFileStream(fileKey) {
   const downloadParams = {
@@ -41,7 +41,7 @@ function getFileStream(fileKey) {
   return s3.getObject(downloadParams).createReadStream();
 }
 
-const downloadFromS3 = async (fileKey, location) => {
+const downloadFile = async (fileKey, location) => {
 
   const params = {
     Key: fileKey,
@@ -52,14 +52,29 @@ const downloadFromS3 = async (fileKey, location) => {
 
   await fs.writeFile(location + fileKey, Body, function (err, result) {
     if (err) console.log('error', err);
+    
   });
 
   return true;
+}
+
+function deleteFile (fileKey) {
+  try {
+    const params = {
+      Key: fileKey,
+      Bucket: bucketName
+    }
+
+    s3.deleteObject(params).promise();
+  } catch (err) {
+    console.error(err);
+  }
 
 }
 
 module.exports = {
   uploadFile,
   getFileStream,
-  downloadFromS3
+  downloadFile,
+  deleteFile
 };

@@ -362,6 +362,18 @@ module.exports = function () {
         isLoggedIn,
         ordenesController.printOrden
     );
+    router.get('/estatus_ordenes_cerrar',
+        isLoggedIn,
+        ordenesController.statusOrdsCerrar
+    );
+    router.get('/info_orden/:id',
+        isLoggedIn,
+        ordenesController.infoOrden
+    );
+    router.post('/cerrar_orden',
+        isLoggedIn,
+        ordenesController.cerrarOrden
+    );
 
     router.post('/consultar_agenda',
         isLoggedIn,

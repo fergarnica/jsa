@@ -31,9 +31,7 @@ const tblUsuarios = document.querySelector('#tbl-usuarios');
 
                 if (respuesta.data != 'empty') {
 
-                    //console.log(tableLanguage);
                     var dataSet = respuesta.data;
-                    //console.log(dataSet);
 
                     $(tblPerfiles).DataTable({
                         data: dataSet,
@@ -109,7 +107,7 @@ const tblUsuarios = document.querySelector('#tbl-usuarios');
             .then(function (respuesta) {
 
                 var dataSet = respuesta.data;
-                //console.log(dataSet);
+
                 if (respuesta.data != 'empty') {
                     $(tblEmpleados).DataTable({
                         data: dataSet,
@@ -194,7 +192,6 @@ const tblUsuarios = document.querySelector('#tbl-usuarios');
             .then(function (respuesta) {
 
                 var dataSet = respuesta.data;
-                //console.log(dataSet);
 
                 if (respuesta.data != 'empty') {
                     $(tblUsuarios).DataTable({
@@ -544,11 +541,9 @@ $(document).on("click", "#btn-eliminar-perfil", function () {
 
             var route = '/perfiles/' + idPerfil;
 
-            console.log(route);
-
             axios.delete(route)
                 .then(function (respuesta) {
-                    //console.log(respuesta);
+
                     Swal.fire(
                         'Eliminado!',
                         respuesta.data,
@@ -630,117 +625,124 @@ if (formNewUser) {
         var payload = {};
 
         var nameUser = document.getElementById("userEmpleado").value;
-        var nickUser = document.getElementById("userAlias").value;
+        var nickUser = eliminarAcentos(document.getElementById("userAlias").value);
         var passUser = document.getElementById("userPass").value;
         var passUser2 = document.getElementById("userPass2").value;
         var perfilUser = document.getElementById("userPerfil").value;
-        //var fileUser = document.getElementById("nuevaFoto").value;
-
-        payload.idempleado = nameUser;
-        payload.usuario = nickUser;
-        payload.passUser = passUser;
-        payload.pass_usuario2 = passUser2;
-        payload.idperfil = perfilUser;
-        payload.status_usuario = 1;
-        payload.fecha_creacion = moment().format('YYYY-MM-DD H:mm:ss');
-        payload.fecha_ultimologin = null;
-
-        if (payload.idempleado == "") {
+        
+        if (nickUser.split(' ').length >= 2) {
             Swal.fire({
                 icon: 'warning',
                 title: 'Oops...',
-                text: 'Es necesario selecionar el nombre del Usuario!',
+                text: 'No se permiten espacios en blanco para el nombre de usuario!',
             })
         } else {
-            if (payload.usuario == "") {
+
+            payload.idempleado = nameUser;
+            payload.usuario = nickUser;
+            payload.passUser = passUser;
+            payload.pass_usuario2 = passUser2;
+            payload.idperfil = perfilUser;
+            payload.status_usuario = 1;
+            payload.fecha_creacion = moment().format('YYYY-MM-DD H:mm:ss');
+            payload.fecha_ultimologin = null;
+
+            if (payload.idempleado == "") {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Oops...',
-                    text: 'Es necesario indicar la clave del Usuario!',
+                    text: 'Es necesario selecionar el nombre del Usuario!',
                 })
             } else {
-                if (payload.passUser == "") {
+                if (payload.usuario == "") {
                     Swal.fire({
                         icon: 'warning',
                         title: 'Oops...',
-                        text: 'Es necesario indicar la contraseña del Usuario!',
+                        text: 'Es necesario ingresar la clave del Usuario!',
                     })
                 } else {
-                    if (payload.pass_usuario2 == "") {
+                    if (payload.passUser == "" || passUser.length < 5) {
                         Swal.fire({
                             icon: 'warning',
                             title: 'Oops...',
-                            text: 'Ingrese nuevamente la contraseña del Usuario!',
+                            text: 'Es necesario ingresar una contraseña con 5 dígitos de longitud como mínimo!',
                         })
                     } else {
-                        if (payload.passUser != payload.pass_usuario2) {
-
+                        if (payload.pass_usuario2 == "") {
                             Swal.fire({
-                                icon: 'error',
+                                icon: 'warning',
                                 title: 'Oops...',
-                                text: 'Las contraseñas no coinciden!',
+                                text: 'Ingrese nuevamente la contraseña del Usuario!',
                             })
-
                         } else {
-                            if (payload.idperfil == "") {
+                            if (payload.passUser != payload.pass_usuario2) {
+
                                 Swal.fire({
-                                    icon: 'warning',
+                                    icon: 'error',
                                     title: 'Oops...',
-                                    text: 'Es necesario seleccionar el perfil del Usuario!',
+                                    text: 'Las contraseñas no coinciden!',
                                 })
+
                             } else {
-                                axios.post('/usuarios', payload)
-                                    .then(function (respuesta) {
+                                if (payload.idperfil == "") {
+                                    Swal.fire({
+                                        icon: 'warning',
+                                        title: 'Oops...',
+                                        text: 'Es necesario seleccionar el perfil del Usuario!',
+                                    })
+                                } else {
+                                   axios.post('/usuarios', payload)
+                                        .then(function (respuesta) {
 
-                                        if (respuesta.data == 'RepetidoUsuario') {
-
-                                            Swal.fire({
-                                                icon: 'warning',
-                                                title: 'Oops...',
-                                                text: 'El usuario ya existe en la base de datos!',
-                                            })
-
-                                        } else {
-
-                                            if (respuesta.data == 'RepetidoEmpleado') {
-
-                                                $('#modalAgregarUsuario').modal('dispose');
+                                            if (respuesta.data == 'RepetidoUsuario') {
 
                                                 Swal.fire({
                                                     icon: 'warning',
                                                     title: 'Oops...',
-                                                    text: 'El empleado seleccionado ya tiene asignado un usuario!',
+                                                    text: 'El usuario ya existe en la base de datos!',
                                                 })
 
                                             } else {
-                                                // Alerta
-                                                Swal.fire(
-                                                    'Usuario Creado',
-                                                    respuesta.data,
-                                                    'success'
-                                                ).then(function (result) {
-                                                    if (result.value) {
-                                                        window.location = "/usuarios";
-                                                    }
-                                                });
+
+                                                if (respuesta.data == 'RepetidoEmpleado') {
+
+                                                    $('#modalAgregarUsuario').modal('dispose');
+
+                                                    Swal.fire({
+                                                        icon: 'warning',
+                                                        title: 'Oops...',
+                                                        text: 'El empleado seleccionado ya tiene asignado un usuario!',
+                                                    })
+
+                                                } else {
+                                                    // Alerta
+                                                    Swal.fire(
+                                                        'Usuario Creado',
+                                                        respuesta.data,
+                                                        'success'
+                                                    ).then(function (result) {
+                                                        if (result.value) {
+                                                            window.location = "/usuarios";
+                                                        }
+                                                    });
+                                                }
                                             }
-                                        }
-                                    }).catch(errors => {
-                                        Swal.fire({
-                                            icon: 'error',
-                                            title: 'Hubo un error',
-                                            text: 'Error en la Base de Datos'
-                                        })
-                                    })
+                                        }).catch(errors => {
+                                            Swal.fire({
+                                                icon: 'error',
+                                                title: 'Hubo un error',
+                                                text: 'Error en la Base de Datos'
+                                            })
+                                        });
+                                }
+
                             }
-
                         }
-                    }
 
+                    }
                 }
             }
         }
-
     });
 }
 /*=============================================
@@ -1201,11 +1203,9 @@ $(document).on("click", "#btn-eliminar-empleado", function () {
 
             var route = '/empleados/' + idPerfil;
 
-            console.log(route);
-
             axios.delete(route)
                 .then(function (respuesta) {
-                    //console.log(respuesta);
+
                     Swal.fire(
                         'Eliminado!',
                         respuesta.data,
@@ -1294,8 +1294,6 @@ $(document).on("click", "#btn-estatus-usuario", function () {
     payload.idUsuario = idUsuario;
     payload.estadoUsuario = estadoUsuario;
 
-    console.log(payload);
-
     axios.put('/usuarios', payload)
         .then(function (respuesta) {
             if (window.matchMedia("(max-width:767px)").matches) {
@@ -1358,7 +1356,7 @@ $(document).on("click", "#btn-eliminar-usuario", function () {
 
             axios.delete(route)
                 .then(function (respuesta) {
-                    //console.log(respuesta);
+
                     Swal.fire(
                         'Eliminado!',
                         respuesta.data,
@@ -1444,9 +1442,8 @@ $(document).on("click", "#btn-imagen-empl", function () {
     axios.get(route)
         .then(function (respuesta) {
 
-            console.log(respuesta.data);
-            if(respuesta.data != 'empty'){
-                
+            if (respuesta.data != 'empty') {
+
                 var rutaImagen = '/empleados/imagen/' + respuesta.data;
 
                 $("#previsualizar").attr("src", rutaImagen);
@@ -1492,7 +1489,7 @@ const uploadFile = (formData) => {
                     if (result.value) {
                         window.location = "/empleados";
                     }
-                });    
+                });
 
             }
         }).catch(errors => {
@@ -1505,7 +1502,7 @@ const uploadFile = (formData) => {
             if (result.value) {
                 window.location = "/empleados";
             }
-        }); 
+        });
 
 };
 
@@ -1524,3 +1521,6 @@ function validarEmail(elemento) {
 
 }
 
+function eliminarAcentos(texto) {
+    return texto.normalize('NFD').replace(/[\u0300-\u036f]/g,"");
+}

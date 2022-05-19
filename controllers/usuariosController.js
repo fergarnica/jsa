@@ -1,6 +1,6 @@
 const pool = require('../config/db');
 const helpers = require('../config/helpers');
-const { uploadFile, getFileStream } = require('../helpers/s3');
+const { uploadFile, getFileStream, deleteFile } = require('../helpers/s3');
 
 
 const { v4: uuidv4 } = require('uuid');
@@ -15,14 +15,34 @@ exports.subirImgEmpl = async (req, res, next) => {
 
     const uuid = uuidv4();
 
-    var result = await uploadFile(file,uuid);
+    var result = await uploadFile(file, uuid);
 
     var key = result.Key;
 
     if (key) {
-        await pool.query('UPDATE empleados SET imagen = ? WHERE idempleado = ?', [key, idEmpleado]);
 
-        res.send('La imágen se actualizó de forma correcta!')
+        const existImg = await pool.query('SELECT imagen FROM empleados WHERE idempleado =?', idEmpleado);
+
+        var oldImg = existImg[0].imagen;
+
+        if (oldImg === null || oldImg ==='no-available.png') {
+
+            await pool.query('UPDATE empleados SET imagen = ? WHERE idempleado = ?', [key, idEmpleado]);
+
+            res.send('La imágen se actualizó de forma correcta!')
+
+        } else {
+
+            console.log(oldImg);
+
+            //await deleteFile(oldImg);
+
+            await pool.query('UPDATE empleados SET imagen = ? WHERE idempleado = ?', [key, idEmpleado]);
+
+            res.send('La imágen se actualizó de forma correcta!')
+
+        }
+
     }
 
 }
@@ -62,9 +82,6 @@ exports.usuarios = async (req, res) => {
 
     var idUsuario = res.locals.usuario.idusuario;
     var url = req.originalUrl;
-
-    console.log(idUsuario);
-    console.log(url);
 
     var permiso = await validAccess(idUsuario, url);
 

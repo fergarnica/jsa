@@ -1,0 +1,45 @@
+select.error,
+textarea.error,
+input.error {
+    color: #FF0000;
+}
+
+.my-error-class {
+    color: #FF0000;
+    /* red */
+}
+
+.my-valid-class {
+    color: #00CC00;
+    /* green */
+}
+
+.card-footer-cut {
+    padding: 0.75rem 1.25rem;
+    content          : " ";
+    display          : block;
+    position         : relative;
+    top              : 0;
+    left             : 0;
+    width            : 100%;
+    height           : 36px;
+    background       : -webkit-linear-gradient(#fff 0, transparent 0), -webkit-linear-gradient(135deg, #F5F5F5 33.33%, transparent 33.33%) 0 0, #F5F5F5 -webkit-linear-gradient(45deg, #F5F5F5 33.33%, #fff 33.33%) 0 0;
+    background       : -o-linear-gradient(#fff 0, transparent 0), -o-linear-gradient(135deg, #F5F5F5 33.33%, transparent 33.33%) 0 0, #F5F5F5 -o-linear-gradient(45deg, #F5F5F5 33.33%, #fff 33.33%) 0 0;
+    background       : -moz-linear-gradient(#fff 0, transparent 0), -moz-linear-gradient(135deg, #F5F5F5 33.33%, transparent 33.33%) 0 0, #F5F5F5 -moz-linear-gradient(45deg, #F5F5F5 33.33%, #fff 33.33%) 0 0;
+    background-repeat: repeat-x;
+    background-size  : 0 100%, 14px 27px, 14px 27px
+  }
+
+  .cabeceraVenta { height: 12px; }
+
+  .bd-example-modal-lg .modal-dialog{
+    display: table;
+    position: relative;
+    margin: 0 auto;
+    top: calc(50% - 24px);
+  }
+
+  .bd-example-modal-lg .modal-dialog .modal-content{
+    background-color: transparent;
+    border: none;
+  }

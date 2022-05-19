@@ -787,7 +787,7 @@ function diaDeSemana(fechaDia) {
     var fecha = new Date();
 
     if (fechaDia <= 0) {
-        //console.log(fechaDia);
+
         var mes = fecha.getMonth();
         var ano = fecha.getFullYear(); //obteniendo año
 
