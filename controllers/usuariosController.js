@@ -455,7 +455,7 @@ exports.mostrarEmpleado = async (req, res) => {
 
     let idEmpleado = req.params.id;
 
-    const dataEmpleado = await pool.query('SELECT * FROM empleados WHERE idempleado = ?', idEmpleado);
+    const dataEmpleado = await pool.query('SELECT * FROM empleados WHERE idempleado = ? AND idempleado!=1', idEmpleado);
 
     res.status(200).send(dataEmpleado);
 

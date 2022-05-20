@@ -39,32 +39,51 @@ if (formNewOrden) {
 
                 var dataVerif = responseUno.data;
 
-                dataVerif.forEach(function (valor, indice, array) {
+                if(dataVerif != 'empty'){
 
-                    var idVerif = valor[1];
-                    var verificador = valor[2];
+                    dataVerif.forEach(function (valor, indice, array) {
 
-                    $("<option />")
-                        .attr("value", idVerif)
-                        .html(verificador)
-                        .appendTo("#selectVerif");
-                });
+                        var idVerif = valor[1];
+                        var verificador = valor[2];
+    
+                        $("<option />")
+                            .attr("value", idVerif)
+                            .html(verificador)
+                            .appendTo("#selectVerif");
+                    });
+
+                }else{
+
+                    // Alerta
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Oops...',
+                        text: 'No existe registros en el catálogo de verificadores!',
+                    })
+
+                }
+
+                
             }
 
             if (responseDos.data.length > 0) {
 
                 var dataOfic = responseDos.data;
 
-                dataOfic.forEach(function (valor, indice, array) {
+                if(dataOfic != 'empty'){
 
-                    var idOffice = valor[1];
-                    var oficina = valor[2];
+                    dataOfic.forEach(function (valor, indice, array) {
 
-                    $("<option />")
-                        .attr("value", idOffice)
-                        .html(oficina)
-                        .appendTo("#selectOficina");
-                });
+                        var idOffice = valor[1];
+                        var oficina = valor[2];
+    
+                        $("<option />")
+                            .attr("value", idOffice)
+                            .html(oficina)
+                            .appendTo("#selectOficina");
+                    });
+
+                }
 
             }
 
@@ -72,16 +91,20 @@ if (formNewOrden) {
 
                 var dataActi = responseTres.data;
 
-                dataActi.forEach(function (valor, indice, array) {
+                if(dataActi != 'empty'){
 
-                    var idActi = valor[1];
-                    var actividad = valor[2];
+                    dataActi.forEach(function (valor, indice, array) {
 
-                    $("<option />")
-                        .attr("value", idActi)
-                        .html(actividad)
-                        .appendTo("#selectActi");
-                });
+                        var idActi = valor[1];
+                        var actividad = valor[2];
+    
+                        $("<option />")
+                            .attr("value", idActi)
+                            .html(actividad)
+                            .appendTo("#selectActi");
+                    });
+
+                }
 
             }
 
@@ -89,16 +112,20 @@ if (formNewOrden) {
 
                 var dataMnpio = responseCuatro.data;
 
-                dataMnpio.forEach(function (valor, indice, array) {
+                if(dataMnpio != 'empty'){
 
-                    var cveMnpio = valor[2];
-                    var municipio = valor[3];
+                    dataMnpio.forEach(function (valor, indice, array) {
 
-                    $("<option />")
-                        .attr("value", cveMnpio)
-                        .html(municipio)
-                        .appendTo("#selectMnpio");
-                });
+                        var cveMnpio = valor[2];
+                        var municipio = valor[3];
+    
+                        $("<option />")
+                            .attr("value", cveMnpio)
+                            .html(municipio)
+                            .appendTo("#selectMnpio");
+                    });
+
+                }
 
             }
 
