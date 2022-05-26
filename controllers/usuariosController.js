@@ -84,11 +84,13 @@ exports.usuarios = async (req, res) => {
     var url = req.originalUrl;
 
     var permiso = await validAccess(idUsuario, url);
+    var permisoCrear = await validaPermisoCrear(idUsuario, url);
 
     if (permiso > 0) {
 
         res.render('modulos/usuarios/usuarios', {
-            nombrePagina: 'Usuarios'
+            nombrePagina: 'Usuarios',
+            permisoCrear
         });
 
     } else {
@@ -106,11 +108,13 @@ exports.perfiles = async (req, res) => {
     var url = req.originalUrl;
 
     var permiso = await validAccess(idUsuario, url);
+    var permisoCrear = await validaPermisoCrear(idUsuario, url);
 
     if (permiso > 0) {
 
         res.render('modulos/usuarios/perfiles', {
-            nombrePagina: 'Perfiles'
+            nombrePagina: 'Perfiles',
+            permisoCrear
         });
 
     } else {
@@ -129,11 +133,13 @@ exports.empleados = async (req, res) => {
     var url = req.originalUrl;
 
     var permiso = await validAccess(idUsuario, url);
+    var permisoCrear = await validaPermisoCrear(idUsuario, url);
 
     if (permiso > 0) {
 
         res.render('modulos/empleados/empleados', {
-            nombrePagina: 'Empleados'
+            nombrePagina: 'Empleados',
+            permisoCrear
         });
 
     } else {
@@ -147,32 +153,88 @@ exports.empleados = async (req, res) => {
 }
 
 exports.agregarEmpleadoForm = async (req, res) => {
-    res.render('modulos/empleados/agregar_empleado', {
-        nombrePagina: 'Agregar Empleado'
-    });
+
+    var idUsuario = res.locals.usuario.idusuario;
+    var url = '/empleados';
+
+    var permisoCrear = await validaPermisoCrear(idUsuario, url);
+
+    if(permisoCrear > 0){
+        res.render('modulos/empleados/agregar_empleado', {
+            nombrePagina: 'Agregar Empleado'
+        });
+    }else{
+        res.render('modulos/error/401', {
+            nombrePagina: '401 Unauthorized'
+        });
+    }
+
+    
 }
 
 exports.editarEmpleadoForm = async (req, res) => {
-    res.render('modulos/empleados/editar_empleado', {
-        nombrePagina: 'Editar Empleado'
-    });
+
+    var idUsuario = res.locals.usuario.idusuario;
+    var url = '/empleados';
+
+    var permisoEditar = await validaPermisoEditar(idUsuario, url);
+
+    if (permisoEditar > 0) {
+        res.render('modulos/empleados/editar_empleado', {
+            nombrePagina: 'Editar Empleado'
+        });
+    }else{
+        res.render('modulos/error/401', {
+            nombrePagina: '401 Unauthorized'
+        });
+    }
+
+    
 }
 
 exports.agregarUsuarioForm = async (req, res) => {
-    res.render('modulos/usuarios/agregar_usuario', {
-        nombrePagina: 'Agregar Usuario'
-    });
+
+    var idUsuario = res.locals.usuario.idusuario;
+    var url = '/usuarios';
+
+    var permisoCrear = await validaPermisoCrear(idUsuario, url);
+
+    if(permisoCrear>0){
+        res.render('modulos/usuarios/agregar_usuario', {
+            nombrePagina: 'Agregar Usuario'
+        });
+    }else{
+        res.render('modulos/error/401', {
+            nombrePagina: '401 Unauthorized'
+        });
+    }
+
+    
 }
 
 exports.editarUsuarioForm = async (req, res) => {
-    res.render('modulos/usuarios/editar_usuario', {
-        nombrePagina: 'Editar Usuario'
-    });
+
+    var idUsuario = res.locals.usuario.idusuario;
+    var url = '/usuarios';
+
+    var permisoEditar = await validaPermisoEditar(idUsuario, url);
+
+    if(permisoEditar>0){
+        res.render('modulos/usuarios/editar_usuario', {
+            nombrePagina: 'Editar Usuario'
+        });
+    }else{
+        res.render('modulos/error/401', {
+            nombrePagina: '401 Unauthorized'
+        });
+    }
+    
 }
 
 exports.mostrarPerfiles = async (req, res) => {
 
     const values = await pool.query('SELECT * FROM perfiles');
+    const idUsuario = res.locals.usuario.idusuario;
 
     var valuesTotal = values.length;
 
@@ -183,18 +245,45 @@ exports.mostrarPerfiles = async (req, res) => {
     } else {
 
         const dataPerfiles = [];
+        const route = '/perfiles';
+
+        var permisoEditar = await validaPermisoEditar(idUsuario, route);
+        var permisoEliminar = await validaPermisoEliminar(idUsuario, route);
 
         for (var x = 0; x < valuesTotal; x++) {
 
             conteo = x + 1;
             const arrayPerfiles = values[x];
-            var botones = "<div class='btn-group'><button type='button' id='btn-editar-perfil' class='btn btn-warning' data-toggle='modal' data-target='#modalEditarPerfil' idPerfil=" + "'" + arrayPerfiles.idperfil + "'" + "><i class='fas fa-pencil-alt'></i></button><button id='btn-eliminar-perfil' class='btn btn-danger' idPerfil=" + "'" + arrayPerfiles.idperfil + "'" + "><i class='fa fa-times'></i></button></div>";
 
-            if (arrayPerfiles.status === 0) {
-                var status = "<button type='button' id='btn-estatus-perfil' class='btn btn-danger btn-sm' estadoPerfil='1' idPerfil=" + "'" + arrayPerfiles.idperfil + "'" + ">Desactivado</button>";
-            } else {
-                var status = "<button type='button' id='btn-estatus-perfil' class='btn btn-success btn-sm' estadoPerfil='0' idPerfil=" + "'" + arrayPerfiles.idperfil + "'" + ">Activado</button>";
+            if(permisoEditar > 0){
+
+                var botonEditar = "<button type='button' id='btn-editar-perfil' class='btn btn-warning' data-toggle='modal' data-target='#modalEditarPerfil' idPerfil=" + "'" + arrayPerfiles.idperfil + "'" + "><i class='fas fa-pencil-alt'></i></button>";
+
+                if (arrayPerfiles.status === 0) {
+                    var status = "<button type='button' id='btn-estatus-perfil' class='btn btn-danger btn-sm' estadoPerfil='1' idPerfil=" + "'" + arrayPerfiles.idperfil + "'" + ">Desactivado</button>";
+                } else {
+                    var status = "<button type='button' id='btn-estatus-perfil' class='btn btn-success btn-sm' estadoPerfil='0' idPerfil=" + "'" + arrayPerfiles.idperfil + "'" + ">Activado</button>";
+                }
+
+            }else{
+
+                var botonEditar = "<button type='button' id='btn-editar-perfil' class='btn btn-warning' data-toggle='modal' data-target='#modalEditarPerfil' idPerfil=" + "'" + arrayPerfiles.idperfil + "' disabled" + "><i class='fas fa-pencil-alt'></i></button>";
+
+                if (arrayPerfiles.status === 0) {
+                    var status = "<button type='button' id='btn-estatus-perfil' class='btn btn-danger btn-sm' estadoPerfil='1' idPerfil=" + "'" + arrayPerfiles.idperfil + "' disabled" + ">Desactivado</button>";
+                } else {
+                    var status = "<button type='button' id='btn-estatus-perfil' class='btn btn-success btn-sm' estadoPerfil='0' idPerfil=" + "'" + arrayPerfiles.idperfil + "' disabled" + ">Activado</button>";
+                }
+
             }
+
+            if(permisoEliminar){
+                var botonEliminar = "<button id='btn-eliminar-perfil' class='btn btn-danger' idPerfil=" + "'" + arrayPerfiles.idperfil + "'" + "><i class='fa fa-times'></i></button>";
+            }else{
+                var botonEliminar = "<button id='btn-eliminar-perfil' class='btn btn-danger' idPerfil=" + "'" + arrayPerfiles.idperfil + "' disabled" + "><i class='fa fa-times'></i></button>";
+            }
+
+            var botones = "<div class='btn-group'>" + botonEditar + botonEliminar + "</div>";
 
             var fecha = moment(arrayPerfiles.fecha_creacion).format('YYYY-MM-DD hh:mm:ss a');
 
@@ -394,8 +483,8 @@ exports.agregarEmpleado = async (req, res) => {
 
 exports.mostrarEmpleados = async (req, res) => {
 
-    const values = await pool.query('SELECT * FROM empleados');
-
+    const values = await pool.query('SELECT * FROM empleados WHERE idempleado != 1');
+    const idUsuario = res.locals.usuario.idusuario;
     var valuesTotal = values.length;
 
     if (valuesTotal === 0) {
@@ -405,19 +494,49 @@ exports.mostrarEmpleados = async (req, res) => {
     } else {
 
         const dataEmpleados = [];
+        const route = '/empleados';
+
+        var permisoEditar = await validaPermisoEditar(idUsuario, route);
+        var permisoEliminar = await validaPermisoEliminar(idUsuario, route);
+
 
         for (var x = 0; x < valuesTotal; x++) {
 
             conteo = x + 1;
             const arrayEmpleados = values[x];
 
-            var botones = "<div class='btn-group'><button type='button' id='btn-imagen-empl' class='btn btn-info' data-toggle='modal' data-target='#modalSubirImagen' idEmpleado=" + "'" + arrayEmpleados.idempleado + "'" + "><i class='fas fa-image'></i></button><a type='button' id='btn-editar-empleado' rel='nofollow' class='btn btn-warning' href=" + "'/editar_empleado/" + arrayEmpleados.idempleado + "'" + " idEmpleado=" + "'" + arrayEmpleados.idempleado + "'" + "><i class='fas fa-pencil-alt'></i></a><button id='btn-eliminar-empleado' class='btn btn-danger' idEmpleado=" + "'" + arrayEmpleados.idempleado + "'" + "><i class='fa fa-times'></i></button></div>";
 
-            if (arrayEmpleados.status_empleado === 0) {
-                var status = "<button type='button' id='btn-estatus-empleado' class='btn btn-danger btn-sm' estadoEmpleado='1' idEmpleado=" + "'" + arrayEmpleados.idempleado + "'" + ">Desactivado</button>";
-            } else {
-                var status = "<button type='button' id='btn-estatus-empleado' class='btn btn-success btn-sm' estadoEmpleado='0' idEmpleado=" + "'" + arrayEmpleados.idempleado + "'" + ">Activado</button>";
+            if(permisoEditar > 0){
+
+                var botonEditar = "<a type='button' id='btn-editar-empleado' rel='nofollow' class='btn btn-warning' href=" + "'/editar_empleado/" + arrayEmpleados.idempleado + "'" + " idEmpleado=" + "'" + arrayEmpleados.idempleado + "'" + "><i class='fas fa-pencil-alt'></i></a>";
+                var botonImg = "<button type='button' id='btn-imagen-empl' class='btn btn-info' data-toggle='modal' data-target='#modalSubirImagen' idEmpleado=" + "'" + arrayEmpleados.idempleado + "'" + "><i class='fas fa-image'></i></button>";
+
+                if (arrayEmpleados.status_empleado === 0) {
+                    var status = "<button type='button' id='btn-estatus-empleado' class='btn btn-danger btn-sm' estadoEmpleado='1' idEmpleado=" + "'" + arrayEmpleados.idempleado + "'" + ">Desactivado</button>";
+                } else {
+                    var status = "<button type='button' id='btn-estatus-empleado' class='btn btn-success btn-sm' estadoEmpleado='0' idEmpleado=" + "'" + arrayEmpleados.idempleado + "'" + ">Activado</button>";
+                }
+
+            }else{
+
+                var botonEditar = "<button type='button' id='btn-editar-empleado' rel='nofollow' class='btn btn-warning' idEmpleado=" + "'" + arrayEmpleados.idempleado + "' disabled" + "><i class='fas fa-pencil-alt'></i></button>";
+                var botonImg = "<button type='button' id='btn-imagen-empl' class='btn btn-info' data-toggle='modal' data-target='#modalSubirImagen' idEmpleado=" + "'" + arrayEmpleados.idempleado + "'" + "' disabled" + "><i class='fas fa-image'></i></button>";
+                
+                if (arrayEmpleados.status_empleado === 0) {
+                    var status = "<button type='button' id='btn-estatus-empleado' class='btn btn-danger btn-sm' estadoEmpleado='1' idEmpleado=" + "'" + arrayEmpleados.idempleado + "' disabled" + ">Desactivado</button>";
+                } else {
+                    var status = "<button type='button' id='btn-estatus-empleado' class='btn btn-success btn-sm' estadoEmpleado='0' idEmpleado=" + "'" + arrayEmpleados.idempleado + "' disabled" + ">Activado</button>";
+                }
+
             }
+
+            if(permisoEliminar > 0){
+                var botonEliminar = "<button id='btn-eliminar-empleado' class='btn btn-danger' idEmpleado=" + "'" + arrayEmpleados.idempleado + "'" + "><i class='fa fa-times'></i></button>";
+            }else{
+                var botonEliminar = "<button id='btn-eliminar-empleado' class='btn btn-danger' idEmpleado=" + "'" + arrayEmpleados.idempleado + "' disabled" + "><i class='fa fa-times'></i></button>";
+            }
+
+            var botones = "<div class='btn-group'>" + botonImg + botonEditar + botonEliminar + "</div>";
 
             var fechaCreacion = moment(arrayEmpleados.fecha_creacion).format('DD/MM/YYYY hh:mm:ss a');
             var fechaContratacion = moment(arrayEmpleados.fecha_contratacion).format('DD/MM/YYYY');
@@ -550,7 +669,7 @@ exports.mostrarEmpleadosActivos = async (req, res) => {
 
     const { status } = req.body;
 
-    const values = await pool.query('SELECT * FROM empleados WHERE status_empleado= ?', status);
+    const values = await pool.query('SELECT * FROM empleados WHERE idempleado != 1 AND status_empleado= ?', status);
 
     var valuesTotal = values.length;
 
@@ -637,7 +756,7 @@ exports.agregarUsuario = async (req, res) => {
 exports.mostrarUsuarios = async (req, res) => {
 
     const usuariosValues = await pool.query('SELECT a.idusuario, a.usuario, b.nombre_completo, a.status_usuario, c.perfil, a.fecha_creacion, a.fecha_ultimologin FROM usuarios a INNER JOIN empleados b on a.idempleado=b.idempleado INNER JOIN perfiles c on a.idperfil=c.idperfil order by 1');
-
+    const idUsuario = res.locals.usuario.idusuario;
     var valuesTotal = usuariosValues.length;
 
     if (valuesTotal === 0) {
@@ -647,18 +766,45 @@ exports.mostrarUsuarios = async (req, res) => {
     } else {
 
         const dataUsuarios = [];
+        const route = '/usuarios';
+
+        var permisoEditar = await validaPermisoEditar(idUsuario, route);
+        var permisoEliminar = await validaPermisoEliminar(idUsuario, route);
 
         for (var x = 0; x < valuesTotal; x++) {
 
             conteo = x + 1;
             const arrayUsuarios = usuariosValues[x];
-            var botones = "<div class='btn-group'><a type='button' id='btn-editar-usuario' class='btn btn-warning' href=" + "'/editar_usuario/" + arrayUsuarios.idusuario + "'" + " idEmpleado=" + "'" + arrayUsuarios.idusuario + "'" + "><i class='fas fa-pencil-alt'></i></a><button id='btn-eliminar-usuario' class='btn btn-danger' idUsuario=" + "'" + arrayUsuarios.idusuario + "'" + "><i class='fa fa-times'></i></button></div>";
 
-            if (arrayUsuarios.status_usuario > 0) {
-                var status = "<button type='button' id='btn-estatus-usuario' class='btn btn-success btn-sm' estadoUsuario='0' idUsuario=" + "'" + arrayUsuarios.idusuario + "'" + ">Activado</button>";
-            } else {
-                var status = "<button type='button' id='btn-estatus-usuario' class='btn btn-danger btn-sm' estadoUsuario='1' idUsuario=" + "'" + arrayUsuarios.idusuario + "'" + ">Desactivado</button>";
+            if(permisoEditar>0){
+
+                var botonEditar = "<a type='button' id='btn-editar-usuario' class='btn btn-warning' href=" + "'/editar_usuario/" + arrayUsuarios.idusuario + "'" + " idEmpleado=" + "'" + arrayUsuarios.idusuario + "'" + "><i class='fas fa-pencil-alt'></i></a>";
+
+                if (arrayUsuarios.status_usuario > 0) {
+                    var status = "<button type='button' id='btn-estatus-usuario' class='btn btn-success btn-sm' estadoUsuario='0' idUsuario=" + "'" + arrayUsuarios.idusuario + "'" + ">Activado</button>";
+                } else {
+                    var status = "<button type='button' id='btn-estatus-usuario' class='btn btn-danger btn-sm' estadoUsuario='1' idUsuario=" + "'" + arrayUsuarios.idusuario + "'" + ">Desactivado</button>";
+                }
+
+            }else{
+
+                var botonEditar = "<button type='button' id='btn-editar-usuario' class='btn btn-warning' idEmpleado=" + "'" + arrayUsuarios.idusuario + "'" + "' disabled" + "><i class='fas fa-pencil-alt'></i></button>";
+
+                if (arrayUsuarios.status_usuario > 0) {
+                    var status = "<button type='button' id='btn-estatus-usuario' class='btn btn-success btn-sm' estadoUsuario='0' idUsuario=" + "'" + arrayUsuarios.idusuario + "'" + "' disabled" + ">Activado</button>";
+                } else {
+                    var status = "<button type='button' id='btn-estatus-usuario' class='btn btn-danger btn-sm' estadoUsuario='1' idUsuario=" + "'" + arrayUsuarios.idusuario + "'" + "' disabled" + ">Desactivado</button>";
+                }
             }
+
+            if(permisoEliminar>0){
+                var botonEliminar = "<button id='btn-eliminar-usuario' class='btn btn-danger' idUsuario=" + "'" + arrayUsuarios.idusuario + "'" + "><i class='fa fa-times'></i></button>";
+            }else{
+                var botonEliminar = "<button id='btn-eliminar-usuario' class='btn btn-danger' idUsuario=" + "'" + arrayUsuarios.idusuario + "'" + "' disabled" + "><i class='fa fa-times'></i></button>";
+            }
+            
+            var botones = "<div class='btn-group'>" + botonEditar + botonEliminar + "</div>";
+
             var fechaCreacion = moment(arrayUsuarios.fecha_creacion).format('YYYY-MM-DD hh:mm:ss a');
 
             if (arrayUsuarios.fecha_ultimologin === null) {
@@ -823,5 +969,62 @@ async function validAccess(idUsuario, url) {
     var permiso = permiso + validPermU[0].cuenta + validPermP[0].cuenta;
 
     return permiso
+
+}
+
+async function validaPermisoCrear(idUsuario, route) {
+
+    var permiso = 0;
+
+    var idPerfilQry = await pool.query('SELECT idperfil FROM usuarios WHERE idusuario=?', idUsuario);
+    var idMenuQry = await pool.query('SELECT idmenu FROM menu WHERE url=?', route);
+
+    var idPerfil = idPerfilQry[0].idperfil;
+    var idMenu = idMenuQry[0].idmenu;
+
+    var validPermU = await pool.query('SELECT COUNT(1) as cuenta FROM permisos_xusuario WHERE idmenu=? AND idusuario=? AND crear=1', [idMenu, idUsuario]);
+    var validPermP = await pool.query('SELECT COUNT(1) as cuenta FROM permisos_xperfil WHERE idmenu=? AND idperfil=? AND crear=1', [idMenu, idPerfil]);
+
+    var permiso = permiso + validPermU[0].cuenta + validPermP[0].cuenta;
+
+    return permiso;
+
+}
+
+async function validaPermisoEditar(idUsuario, route) {
+
+    var permiso = 0;
+
+    var idPerfilQry = await pool.query('SELECT idperfil FROM usuarios WHERE idusuario=?', idUsuario);
+    var idMenuQry = await pool.query('SELECT idmenu FROM menu WHERE url=?', route);
+
+    var idPerfil = idPerfilQry[0].idperfil;
+    var idMenu = idMenuQry[0].idmenu;
+
+    var validPermU = await pool.query('SELECT COUNT(1) as cuenta FROM permisos_xusuario WHERE idmenu=? AND idusuario=? AND editar=1', [idMenu, idUsuario]);
+    var validPermP = await pool.query('SELECT COUNT(1) as cuenta FROM permisos_xperfil WHERE idmenu=? AND idperfil=? AND editar=1', [idMenu, idPerfil]);
+
+    var permiso = permiso + validPermU[0].cuenta + validPermP[0].cuenta;
+
+    return permiso;
+
+}
+
+async function validaPermisoEliminar(idUsuario, route) {
+
+    var permiso = 0;
+
+    var idPerfilQry = await pool.query('SELECT idperfil FROM usuarios WHERE idusuario=?', idUsuario);
+    var idMenuQry = await pool.query('SELECT idmenu FROM menu WHERE url=?', route);
+
+    var idPerfil = idPerfilQry[0].idperfil;
+    var idMenu = idMenuQry[0].idmenu;
+
+    var validPermU = await pool.query('SELECT COUNT(1) as cuenta FROM permisos_xusuario WHERE idmenu=? AND idusuario=? AND eliminar=1', [idMenu, idUsuario]);
+    var validPermP = await pool.query('SELECT COUNT(1) as cuenta FROM permisos_xperfil WHERE idmenu=? AND idperfil=? AND eliminar=1', [idMenu, idPerfil]);
+
+    var permiso = permiso + validPermU[0].cuenta + validPermP[0].cuenta;
+
+    return permiso;
 
 }

@@ -123,6 +123,18 @@ const salesChartMes = document.querySelector('#ventas-chart-mes');
 
                 }
 
+                if(menuPermCrear){
+        
+                    var permisoCrear = menuPermCrear.value;
+                        
+                    if(permisoCrear > 0){
+                        document.getElementById('btn-agregar-menu').disabled = false;
+                    }else{
+                        document.getElementById('btn-agregar-menu').disabled = true;
+                    }
+            
+                }
+
             }).catch(errors => {
                 Swal.fire({
                     icon: 'error',

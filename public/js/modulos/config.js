@@ -16,6 +16,9 @@ const verifEditTel = document.getElementById('verifEditTel');
 const tblOficinas = document.querySelector('#tbl-oficinas');
 const tblVerif = document.querySelector('#tbl-verificadores');
 
+const oficPermCrear = document.getElementById('oficPermCrear');
+const verifPermCrear = document.getElementById('verifPermCrear');
+
 (function () {
 
     if (formEmpresa) {
@@ -109,6 +112,18 @@ const tblVerif = document.querySelector('#tbl-verificadores');
 
                 }
 
+                if(oficPermCrear){
+        
+                    var permisoCrear = oficPermCrear.value;
+                        
+                    if(permisoCrear > 0){
+                        document.getElementById('btn-agregar-oficina').disabled = false;
+                    }else{
+                        document.getElementById('btn-agregar-oficina').disabled = true;
+                    }
+            
+                }
+
             }).catch(errors => {
                 Swal.fire({
                     icon: 'error',
@@ -187,6 +202,24 @@ const tblVerif = document.querySelector('#tbl-verificadores');
 
                 }
 
+                if(verifPermCrear){
+        
+                    var permisoCrear = verifPermCrear.value;
+                        
+                    if(permisoCrear > 0){
+                        document.getElementById('btn-agregar-verificador').disabled = false;
+                    }else{
+                        document.getElementById('btn-agregar-verificador').disabled = true;
+                    }
+            
+                }
+
+            }).catch(errors => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Hubo un error',
+                    text: 'Error en la Base de Datos'
+                })
             })
 
     }
@@ -309,7 +342,7 @@ if (searchPermisos) {
 
         var route = '/permiso_x_perfil/' + perfilUser;
 
-        axios.get(route)
+        axios.get(route,)
             .then(function (respuesta) {
 
                 $('#btnSearchPermisos').html('<i class="fa fa-search"></i> Consultar').removeClass('disabled');
@@ -363,7 +396,7 @@ if (searchPermisos) {
 
                         },
                         createdRow: function (row, data, dataIndex) {
-                            var idpadre = data[4];
+                            var idpadre = data[7];
                             //Pintar toda la columna
                             if (idpadre == 0) {
                                 $('td', row).css('background-color', '#D6EAF8');
@@ -381,6 +414,15 @@ if (searchPermisos) {
                         },
                         {
                             title: "Acceso"
+                        },
+                        {
+                            title: "Crear"
+                        },
+                        {
+                            title: "Editar"
+                        },
+                        {
+                            title: "Eliminar"
                         }
                         ]
                     });
@@ -408,20 +450,74 @@ $(document).on("change", ".checkAcceso", function () {
     var idCheck = null;
     var idMenu = $(this).attr("idMenu");
     var idCheck = $(this).attr('id');
+    var idPadre = $(this).attr("idPadre");
     var idPerfil = document.getElementById('userPerfil').value;
+    var idCheckCrear = idCheck.trim() + 'c';
+    var idCheckEditar = idCheck.trim() + 'e';
+    var idCheckEliminar = idCheck.trim() + 'el';
+    var permiso = 'accesar';
     var payload = {};
 
     const checkAcceso = document.getElementById(idCheck);
 
     if (checkAcceso.checked == true) {
+
         var acceso = 1;
+
+        if (idPadre > 0) {
+
+            if (document.getElementById(idCheckCrear).disabled == true) {
+                document.getElementById(idCheckCrear).disabled = false;
+            }
+
+            if (document.getElementById(idCheckEditar).disabled == true) {
+                document.getElementById(idCheckEditar).disabled = false;
+            }
+
+            if (document.getElementById(idCheckEliminar).disabled == true) {
+                document.getElementById(idCheckEliminar).disabled = false;
+            }
+
+        }
+
     } else {
+
         var acceso = 0;
+
+        if (idPadre > 0) {
+
+            if (document.getElementById(idCheckCrear).disabled == false) {
+                document.getElementById(idCheckCrear).disabled = true;
+            }
+
+            if (document.getElementById(idCheckEditar).disabled == false) {
+                document.getElementById(idCheckEditar).disabled = true;
+            }
+
+            if (document.getElementById(idCheckEliminar).disabled == false) {
+                document.getElementById(idCheckEliminar).disabled = true;
+            }
+
+            if (document.getElementById(idCheckCrear).checked == true) {
+                document.getElementById(idCheckCrear).checked = false;
+            }
+
+            if (document.getElementById(idCheckEditar).checked == true) {
+                document.getElementById(idCheckEditar).checked = false;
+            }
+
+            if (document.getElementById(idCheckEliminar).checked == true) {
+                document.getElementById(idCheckEliminar).checked = false;
+            }
+
+        }
+
     }
 
     payload.idmenu = idMenu;
     payload.idperfil = idPerfil;
     payload.acceso = acceso;
+    payload.permiso = permiso;
 
     axios.put('/permiso_x_perfil', payload)
         .then(function (respuesta) {
@@ -434,6 +530,183 @@ $(document).on("change", ".checkAcceso", function () {
                 timer: 1000
             })
 
+        }).catch(errors => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Hubo un error',
+                text: 'Error en la Base de Datos'
+            })
+        })
+
+});
+
+$(document).on("change", ".checkCrear", function () {
+
+    var idMenu = $(this).attr("idMenu");
+    var idCheckCrear = $(this).attr('id');
+    var idPerfil = document.getElementById('userPerfil').value;
+    var permiso = 'crear';
+    var payload = {};
+
+    const checkCrear = document.getElementById(idCheckCrear);
+
+    if (checkCrear.checked == true) {
+        var acceso = 1;
+    } else {
+        var acceso = 0;
+    }
+
+    payload.idmenu = idMenu;
+    payload.idperfil = idPerfil;
+    payload.acceso = acceso;
+    payload.permiso = permiso;
+
+    axios.put('/permiso_x_perfil', payload)
+        .then(function (respuesta) {
+
+            if (respuesta.data != 'Error') {
+
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Cambios guardados!',
+                    showConfirmButton: false,
+                    timer: 1000
+                });
+
+            } else {
+
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Error al actualizar!',
+                    showConfirmButton: false,
+                    timer: 1000
+                });
+
+            }
+
+
+        }).catch(errors => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Hubo un error',
+                text: 'Error en la Base de Datos'
+            })
+        })
+
+});
+
+$(document).on("change", ".checkEditar", function () {
+
+    var idMenu = $(this).attr("idMenu");
+    var idCheckEditar = $(this).attr('id');
+    var idPerfil= document.getElementById('userPerfil').value;
+    var permiso = 'editar';
+    var payload = {};
+
+    const checkEditar = document.getElementById(idCheckEditar);
+
+    if (checkEditar.checked == true) {
+        var acceso = 1;
+    } else {
+        var acceso = 0;
+    }
+
+    payload.idmenu = idMenu;
+    payload.idperfil = idPerfil;
+    payload.acceso = acceso;
+    payload.permiso = permiso;
+
+    axios.put('/permiso_x_perfil', payload)
+        .then(function (respuesta) {
+
+            if (respuesta.data != 'Error') {
+
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Cambios guardados!',
+                    showConfirmButton: false,
+                    timer: 1000
+                });
+
+            } else {
+
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Error al actualizar!',
+                    showConfirmButton: false,
+                    timer: 1000
+                });
+
+            }
+
+
+        }).catch(errors => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Hubo un error',
+                text: 'Error en la Base de Datos'
+            })
+        })
+
+});
+
+$(document).on("change", ".checkEliminar", function () {
+
+    var idMenu = $(this).attr("idMenu");
+    var idCheckEliminar = $(this).attr('id');
+    var idPerfil = document.getElementById('userPerfil').value;
+    var permiso = 'eliminar';
+    var payload = {};
+
+    const checkEliminar = document.getElementById(idCheckEliminar);
+
+    if (checkEliminar.checked == true) {
+        var acceso = 1;
+    } else {
+        var acceso = 0;
+    }
+
+    payload.idmenu = idMenu;
+    payload.idperfil = idPerfil;
+    payload.acceso = acceso;
+    payload.permiso = permiso;
+
+    axios.put('/permiso_x_perfil', payload)
+        .then(function (respuesta) {
+
+            if (respuesta.data != 'Error') {
+
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Cambios guardados!',
+                    showConfirmButton: false,
+                    timer: 1000
+                });
+
+            } else {
+
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Error al actualizar!',
+                    showConfirmButton: false,
+                    timer: 1000
+                });
+
+            }
+
+
+        }).catch(errors => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Hubo un error',
+                text: 'Error en la Base de Datos'
+            })
         })
 
 });
@@ -532,7 +805,7 @@ if (searchPermisosxUser) {
 
                         },
                         createdRow: function (row, data, dataIndex) {
-                            var idpadre = data[4];
+                            var idpadre = data[7];
                             //Pintar toda la columna
                             if (idpadre == 0) {
                                 $('td', row).css('background-color', '#D6EAF8');
@@ -550,6 +823,15 @@ if (searchPermisosxUser) {
                         },
                         {
                             title: "Acceso"
+                        },
+                        {
+                            title: "Crear"
+                        },
+                        {
+                            title: "Editar"
+                        },
+                        {
+                            title: "Eliminar"
                         }
                         ]
                     });
@@ -577,21 +859,75 @@ $(document).on("change", ".checkAccesoUser", function () {
 
     var idCheck = null;
     var idMenu = $(this).attr("idMenu");
+    var idPadre = $(this).attr("idPadre");
     var idCheck = $(this).attr('id');
     var idUser = document.getElementById('userName').value;
+    var idCheckCrear = idCheck.trim() + 'c';
+    var idCheckEditar = idCheck.trim() + 'e';
+    var idCheckEliminar = idCheck.trim() + 'el';
+    var permiso = 'accesar';
     var payload = {};
 
     const checkAcceso = document.getElementById(idCheck);
 
     if (checkAcceso.checked == true) {
+
         var acceso = 1;
+
+        if (idPadre > 0) {
+
+            if (document.getElementById(idCheckCrear).disabled == true) {
+                document.getElementById(idCheckCrear).disabled = false;
+            }
+
+            if (document.getElementById(idCheckEditar).disabled == true) {
+                document.getElementById(idCheckEditar).disabled = false;
+            }
+
+            if (document.getElementById(idCheckEliminar).disabled == true) {
+                document.getElementById(idCheckEliminar).disabled = false;
+            }
+
+        }
+
     } else {
+
         var acceso = 0;
+
+        if (idPadre > 0) {
+
+            if (document.getElementById(idCheckCrear).disabled == false) {
+                document.getElementById(idCheckCrear).disabled = true;
+            }
+
+            if (document.getElementById(idCheckEditar).disabled == false) {
+                document.getElementById(idCheckEditar).disabled = true;
+            }
+
+            if (document.getElementById(idCheckEliminar).disabled == false) {
+                document.getElementById(idCheckEliminar).disabled = true;
+            }
+
+            if (document.getElementById(idCheckCrear).checked == true) {
+                document.getElementById(idCheckCrear).checked = false;
+            }
+
+            if (document.getElementById(idCheckEditar).checked == true) {
+                document.getElementById(idCheckEditar).checked = false;
+            }
+
+            if (document.getElementById(idCheckEliminar).checked == true) {
+                document.getElementById(idCheckEliminar).checked = false;
+            }
+
+        }
+
     }
 
     payload.idmenu = idMenu;
     payload.idusuario = idUser;
     payload.acceso = acceso;
+    payload.permiso = permiso;
 
     axios.put('/permiso_x_usuario', payload)
         .then(function (respuesta) {
@@ -603,6 +939,177 @@ $(document).on("change", ".checkAccesoUser", function () {
                 showConfirmButton: false,
                 timer: 1000
             });
+
+        }).catch(errors => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Hubo un error',
+                text: 'Error en la Base de Datos'
+            })
+        })
+
+});
+
+$(document).on("change", ".checkCrearxUser", function () {
+
+    var idMenu = $(this).attr("idMenu");
+    var idCheckCrear = $(this).attr('id');
+    var idUser = document.getElementById('userName').value;
+    var permiso = 'crear';
+    var payload = {};
+
+    const checkCrear = document.getElementById(idCheckCrear);
+
+    if (checkCrear.checked == true) {
+        var acceso = 1;
+    } else {
+        var acceso = 0;
+    }
+
+    payload.idmenu = idMenu;
+    payload.idusuario = idUser;
+    payload.acceso = acceso;
+    payload.permiso = permiso;
+
+    axios.put('/permiso_x_usuario', payload)
+        .then(function (respuesta) {
+
+            if (respuesta.data != 'Error') {
+
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Cambios guardados!',
+                    showConfirmButton: false,
+                    timer: 1000
+                });
+
+            } else {
+
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Error al actualizar!',
+                    showConfirmButton: false,
+                    timer: 1000
+                });
+
+            }
+
+
+        }).catch(errors => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Hubo un error',
+                text: 'Error en la Base de Datos'
+            })
+        })
+
+});
+
+$(document).on("change", ".checkEditarxUser", function () {
+
+    var idMenu = $(this).attr("idMenu");
+    var idCheckEditar = $(this).attr('id');
+    var idUser = document.getElementById('userName').value;
+    var permiso = 'editar';
+    var payload = {};
+
+    const checkEditar = document.getElementById(idCheckEditar);
+
+    if (checkEditar.checked == true) {
+        var acceso = 1;
+    } else {
+        var acceso = 0;
+    }
+
+    payload.idmenu = idMenu;
+    payload.idusuario = idUser;
+    payload.acceso = acceso;
+    payload.permiso = permiso;
+
+    axios.put('/permiso_x_usuario', payload)
+        .then(function (respuesta) {
+
+            if (respuesta.data != 'Error') {
+
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Cambios guardados!',
+                    showConfirmButton: false,
+                    timer: 1000
+                });
+
+            } else {
+
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Error al actualizar!',
+                    showConfirmButton: false,
+                    timer: 1000
+                });
+
+            }
+
+
+        }).catch(errors => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Hubo un error',
+                text: 'Error en la Base de Datos'
+            })
+        })
+
+});
+
+$(document).on("change", ".checkEliminarxUser", function () {
+
+    var idMenu = $(this).attr("idMenu");
+    var idCheckEliminar = $(this).attr('id');
+    var idUser = document.getElementById('userName').value;
+    var permiso = 'eliminar';
+    var payload = {};
+
+    const checkEliminar = document.getElementById(idCheckEliminar);
+
+    if (checkEliminar.checked == true) {
+        var acceso = 1;
+    } else {
+        var acceso = 0;
+    }
+
+    payload.idmenu = idMenu;
+    payload.idusuario = idUser;
+    payload.acceso = acceso;
+    payload.permiso = permiso;
+
+    axios.put('/permiso_x_usuario', payload)
+        .then(function (respuesta) {
+
+            if (respuesta.data != 'Error') {
+
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Cambios guardados!',
+                    showConfirmButton: false,
+                    timer: 1000
+                });
+
+            } else {
+
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Error al actualizar!',
+                    showConfirmButton: false,
+                    timer: 1000
+                });
+
+            }
+
 
         }).catch(errors => {
             Swal.fire({

@@ -81,11 +81,13 @@ exports.menus = async (req, res) => {
     var url = req.originalUrl;
 
     var permiso = await validAccess(idUsuario, url);
+    var permisoCrear = await validaPermisoCrear(idUsuario, url);
 
     if(permiso>0){
 
         res.render('modulos/menu/menus', {
-            nombrePagina: 'Menús'
+            nombrePagina: 'Menús',
+            permisoCrear
         });
 
     }else{
@@ -101,7 +103,7 @@ exports.menus = async (req, res) => {
 exports.mostrarMenus = async (req, res) => {
 
     const values = await pool.query('call get_all_menus');
-
+    const idUsuario = res.locals.usuario.idusuario;
     const results = values[0];
 
     var valuesTotal = results.length;
@@ -113,22 +115,49 @@ exports.mostrarMenus = async (req, res) => {
     } else {
 
         const dataMenus = [];
+        const route = '/menus';
+
+        var permisoCrear = await validaPermisoCrear(idUsuario, route);
+        var permisoEditar = await validaPermisoEditar(idUsuario, route);
+        var permisoEliminar = await validaPermisoEliminar(idUsuario, route);
 
         for (var x = 0; x < valuesTotal; x++) {
 
             conteo = x + 1;
             const arrayMenus = results[x];
 
-            if (arrayMenus.id_padre === 0) {
-                var botones = "<div class='btn-group'><a id='btn-agregar-submenu' class='btn btn-info' href=" + "'/agregar_submenu/" + arrayMenus.idmenu + "'" + " idMenu=" + "'" + arrayMenus.idmenu + "'" + "'" + "><i class='fa fa-plus'></i></a><a type='button' id='btn-editar-menu' class='btn btn-warning' href=" + "'/editar_menu/" + arrayMenus.idmenu + "'" + " idMenu=" + "'" + arrayMenus.idmenu + "'" + "><i class='fas fa-pencil-alt'></i></a><button id='btn-eliminar-menu' class='btn btn-danger' idMenu=" + "'" + arrayMenus.idmenu + "'" + " idPadre=" + "'" + arrayMenus.id_padre + "'" +"><i class='fa fa-times'></i></button></div>";
-            } else {
-                var botones = "<div class='btn-group'><a type='button' id='btn-editar-menu' class='btn btn-warning' href=" + "'/editar_menu/" + arrayMenus.idmenu + "'" + " idMenu=" + "'" + arrayMenus.idmenu + "'" + "><i class='fas fa-pencil-alt'></i></a><button id='btn-eliminar-menu' class='btn btn-danger' idMenu=" + "'" + arrayMenus.idmenu + "'" + " idPadre=" + "'" + arrayMenus.id_padre + "'" + "><i class='fa fa-times'></i></button></div>";
+            if(permisoCrear>0){
+                var botonCrear = "<a id='btn-agregar-submenu' class='btn btn-info' href=" + "'/agregar_submenu/" + arrayMenus.idmenu + "'" + " idMenu=" + "'" + arrayMenus.idmenu + "'" + "'" + "><i class='fa fa-plus'></i></a>";
+            }else{
+                var botonCrear = "<button id='btn-agregar-submenu' class='btn btn-info' idMenu=" + "'" + arrayMenus.idmenu + "'" + "'" + "' disabled" + "><i class='fa fa-plus'></i></button>";
             }
 
-            if (arrayMenus.status === 0) {
-                var status = "<button type='button' id='btn-estatus-menu' class='btn btn-danger btn-sm' estadoMenu='1' idMenu=" + "'" + arrayMenus.idmenu + "'" + ">Desactivado</button>";
+            if(permisoEditar>0){
+                var botonEditar = "<a type='button' id='btn-editar-menu' class='btn btn-warning' href=" + "'/editar_menu/" + arrayMenus.idmenu + "'" + " idMenu=" + "'" + arrayMenus.idmenu + "'" + "><i class='fas fa-pencil-alt'></i></a>";
+                if (arrayMenus.status === 0) {
+                    var status = "<button type='button' id='btn-estatus-menu' class='btn btn-danger btn-sm' estadoMenu='1' idMenu=" + "'" + arrayMenus.idmenu + "'" + ">Desactivado</button>";
+                } else {
+                    var status = "<button type='button' id='btn-estatus-menu' class='btn btn-success btn-sm' estadoMenu='0' idMenu=" + "'" + arrayMenus.idmenu + "'" + ">Activado</button>";
+                }
+            }else{
+                var botonEditar = "<button type='button' id='btn-editar-menu' class='btn btn-warning' idMenu=" + "'" + arrayMenus.idmenu + "'" + "' disabled" + "><i class='fas fa-pencil-alt'></i></button>";
+                if (arrayMenus.status === 0) {
+                    var status = "<button type='button' id='btn-estatus-menu' class='btn btn-danger btn-sm' estadoMenu='1' idMenu=" + "'" + arrayMenus.idmenu + "'" + "' disabled" + ">Desactivado</button>";
+                } else {
+                    var status = "<button type='button' id='btn-estatus-menu' class='btn btn-success btn-sm' estadoMenu='0' idMenu=" + "'" + arrayMenus.idmenu + "'" + "' disabled" + ">Activado</button>";
+                }
+            }
+
+            if(permisoEliminar>0){
+                var botonEliminar = "<button id='btn-eliminar-menu' class='btn btn-danger' idMenu=" + "'" + arrayMenus.idmenu + "'" + " idPadre=" + "'" + arrayMenus.id_padre + "'" +"><i class='fa fa-times'></i></button>";
+            }else{
+                var botonEliminar = "<button id='btn-eliminar-menu' class='btn btn-danger' idMenu=" + "'" + arrayMenus.idmenu + "'" + " idPadre=" + "'" + arrayMenus.id_padre + "'" +"' disabled" + "><i class='fa fa-times'></i></button>";
+            }
+
+            if (arrayMenus.id_padre === 0) {
+                var botones = "<div class='btn-group'>" + botonCrear + botonEditar + botonEliminar + "</div>";
             } else {
-                var status = "<button type='button' id='btn-estatus-menu' class='btn btn-success btn-sm' estadoMenu='0' idMenu=" + "'" + arrayMenus.idmenu + "'" + ">Activado</button>";
+                var botones = "<div class='btn-group'>"+ botonEditar + botonEliminar + "</div>";
             }
 
             const obj = [
@@ -364,5 +393,62 @@ async function validAccess(idUsuario, url){
     var permiso = permiso + validPermU[0].cuenta + validPermP[0].cuenta;
 
     return permiso
+
+}
+
+async function validaPermisoCrear(idUsuario, route) {
+
+    var permiso = 0;
+
+    var idPerfilQry = await pool.query('SELECT idperfil FROM usuarios WHERE idusuario=?', idUsuario);
+    var idMenuQry = await pool.query('SELECT idmenu FROM menu WHERE url=?', route);
+
+    var idPerfil = idPerfilQry[0].idperfil;
+    var idMenu = idMenuQry[0].idmenu;
+
+    var validPermU = await pool.query('SELECT COUNT(1) as cuenta FROM permisos_xusuario WHERE idmenu=? AND idusuario=? AND crear=1', [idMenu, idUsuario]);
+    var validPermP = await pool.query('SELECT COUNT(1) as cuenta FROM permisos_xperfil WHERE idmenu=? AND idperfil=? AND crear=1', [idMenu, idPerfil]);
+
+    var permiso = permiso + validPermU[0].cuenta + validPermP[0].cuenta;
+
+    return permiso;
+
+}
+
+async function validaPermisoEditar(idUsuario, route) {
+
+    var permiso = 0;
+
+    var idPerfilQry = await pool.query('SELECT idperfil FROM usuarios WHERE idusuario=?', idUsuario);
+    var idMenuQry = await pool.query('SELECT idmenu FROM menu WHERE url=?', route);
+
+    var idPerfil = idPerfilQry[0].idperfil;
+    var idMenu = idMenuQry[0].idmenu;
+
+    var validPermU = await pool.query('SELECT COUNT(1) as cuenta FROM permisos_xusuario WHERE idmenu=? AND idusuario=? AND editar=1', [idMenu, idUsuario]);
+    var validPermP = await pool.query('SELECT COUNT(1) as cuenta FROM permisos_xperfil WHERE idmenu=? AND idperfil=? AND editar=1', [idMenu, idPerfil]);
+
+    var permiso = permiso + validPermU[0].cuenta + validPermP[0].cuenta;
+
+    return permiso;
+
+}
+
+async function validaPermisoEliminar(idUsuario, route) {
+
+    var permiso = 0;
+
+    var idPerfilQry = await pool.query('SELECT idperfil FROM usuarios WHERE idusuario=?', idUsuario);
+    var idMenuQry = await pool.query('SELECT idmenu FROM menu WHERE url=?', route);
+
+    var idPerfil = idPerfilQry[0].idperfil;
+    var idMenu = idMenuQry[0].idmenu;
+
+    var validPermU = await pool.query('SELECT COUNT(1) as cuenta FROM permisos_xusuario WHERE idmenu=? AND idusuario=? AND eliminar=1', [idMenu, idUsuario]);
+    var validPermP = await pool.query('SELECT COUNT(1) as cuenta FROM permisos_xperfil WHERE idmenu=? AND idperfil=? AND eliminar=1', [idMenu, idPerfil]);
+
+    var permiso = permiso + validPermU[0].cuenta + validPermP[0].cuenta;
+
+    return permiso;
 
 }

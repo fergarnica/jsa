@@ -22,9 +22,10 @@
         <div class="card">
             <!-- Card Header -->
             <div class="card-header">
-                <button class="btn btn-primary btn-sm card-tittle" data-toggle="modal" data-target="#modalAgregarOficina">
+                <button id="btn-agregar-oficina" class="btn btn-primary btn-sm card-tittle" data-toggle="modal" data-target="#modalAgregarOficina">
                     <i class="fas fa-plus"></i> Agregar
                 </button>
+                <input type="hidden" value="{{permisoCrear}}" id="oficPermCrear">
             </div>
             <!-- Card Body -->
             <div class="card-body">

@@ -142,16 +142,59 @@ exports.permisosxPerfil = async (req, res) => {
         const array = results[x];
 
         if (array.acceso === 1) {
-            var checkBox = "<input type='checkbox' class='checkAcceso' idMenu=" + "'" + array.idmenu + "'" + " id=" + "'" + array.idmenu + "c 'checked" + ">";
+
+            var checkBoxAcceso = "<input type='checkbox' class='checkAcceso' idPadre=" + "'" + array.id_padre + "'" + " idMenu=" + "'" + array.idmenu + "'" + " id=" + "'" + array.idmenu + "c' checked" + ">";
+
+            if (array.id_padre === 0) {
+                var checkBoxCrear = null;
+                var checkBoxEditar = null;
+                var checkBoxEliminar = null;
+            } else {
+                if (array.crear === 1) {
+                    var checkBoxCrear = "<input type='checkbox' class='checkCrear' idMenu=" + "'" + array.idmenu + "'" + " id=" + "'" + array.idmenu + "cc' checked" + ">";
+                } else {
+                    var checkBoxCrear = "<input type='checkbox' class='checkCrear' idMenu=" + "'" + array.idmenu + "'" + " id=" + "'" + array.idmenu + "cc' " + ">";
+                }
+
+                if (array.editar === 1) {
+                    var checkBoxEditar = "<input type='checkbox' class='checkEditar' idMenu=" + "'" + array.idmenu + "'" + " id=" + "'" + array.idmenu + "ce' checked" + ">";
+                } else {
+                    var checkBoxEditar = "<input type='checkbox' class='checkEditar' idMenu=" + "'" + array.idmenu + "'" + " id=" + "'" + array.idmenu + "ce' " + ">";
+                }
+
+                if (array.eliminar === 1) {
+                    var checkBoxEliminar = "<input type='checkbox' class='checkEliminar' idMenu=" + "'" + array.idmenu + "'" + " id=" + "'" + array.idmenu + "cel' checked" + ">";
+                } else {
+                    var checkBoxEliminar = "<input type='checkbox' class='checkEliminar' idMenu=" + "'" + array.idmenu + "'" + " id=" + "'" + array.idmenu + "cel' " + ">";
+                }
+
+            }
+
+
         } else {
-            var checkBox = "<input type='checkbox' class='checkAcceso' idMenu=" + "'" + array.idmenu + "'" + " id=" + "'" + array.idmenu + "c' " + ">";
+
+            var checkBoxAcceso = "<input type='checkbox' class='checkAcceso' idPadre=" + "'" + array.id_padre + "'" + " idMenu=" + "'" + array.idmenu + "'" + " id=" + "'" + array.idmenu + "c' " + ">";
+
+            if (array.id_padre === 0) {
+                var checkBoxCrear = null;
+                var checkBoxEditar = null;
+                var checkBoxEliminar = null;
+            } else {
+                var checkBoxCrear = "<input type='checkbox' class='checkCrear' idMenu=" + "'" + array.idmenu + "'" + " id=" + "'" + array.idmenu + "cc' " + " disabled>";
+                var checkBoxEditar = "<input type='checkbox' class='checkEditar' idMenu=" + "'" + array.idmenu + "'" + " id=" + "'" + array.idmenu + "ce' " + " disabled>";
+                var checkBoxEliminar = "<input type='checkbox' class='checkEliminar' idMenu=" + "'" + array.idmenu + "'" + " id=" + "'" + array.idmenu + "cel' " + " disabled>";
+            }
+
         }
 
         const obj = [
             array.new_orden,
             array.idmenu,
             array.menu,
-            checkBox,
+            checkBoxAcceso,
+            checkBoxCrear,
+            checkBoxEditar,
+            checkBoxEliminar,
             array.id_padre
         ];
 
@@ -162,31 +205,101 @@ exports.permisosxPerfil = async (req, res) => {
 
 }
 
+
 exports.activarPermxPerfil = async (req, res) => {
 
-    var { idmenu, idperfil, acceso } = req.body;
+    var { idmenu, idperfil, acceso, permiso } = req.body;
 
-    const newPermiso = {
-        idmenu,
-        idperfil,
-        acceso
-    };
+    if (permiso === 'accesar') {
 
-    var countExist = await pool.query('SELECT COUNT(*) AS cuenta FROM permisos_xperfil WHERE idmenu=? and idperfil=?', [idmenu, idperfil]);
+        var crear = 0;
+        var editar = 0;
+        var eliminar = 0;
 
-    var exist = countExist[0].cuenta;
+        const newPermiso = {
+            idmenu,
+            idperfil,
+            acceso,
+            crear,
+            editar,
+            eliminar
+        };
 
-    if (exist === 0) {
+        var countExist = await pool.query('SELECT COUNT(1) AS cuenta FROM permisos_xperfil WHERE idmenu=? and idperfil=?', [idmenu, idperfil]);
 
-        await pool.query('INSERT INTO permisos_xperfil SET ?', [newPermiso]);
+        var exist = countExist[0].cuenta;
 
-        res.send('Insertado');
+        if (exist === 0) {
 
-    } else {
+            await pool.query('INSERT INTO permisos_xperfil SET ?', [newPermiso]);
 
-        await pool.query('UPDATE permisos_xperfil SET acceso = ? WHERE idmenu = ? AND idperfil=?', [newPermiso.acceso, newPermiso.idmenu, newPermiso.idperfil]);
+            res.send('Insertado');
 
-        res.send('Actualizado');
+        } else {
+
+            if (newPermiso.acceso === 0) {
+                await pool.query('UPDATE permisos_xperfil SET acceso = ?, crear = ?, editar = ?, eliminar = ? WHERE idmenu = ? AND idperfil=?', [newPermiso.acceso, newPermiso.crear, newPermiso.editar, newPermiso.eliminar, newPermiso.idmenu, newPermiso.idperfil]);
+            } else {
+                await pool.query('UPDATE permisos_xperfil SET acceso = ? WHERE idmenu = ? AND idperfil=?', [newPermiso.acceso, newPermiso.idmenu, newPermiso.idperfil]);
+            }
+
+            res.send('Actualizado');
+
+        }
+
+    }
+
+    if (permiso === 'crear') {
+
+        var countExist = await pool.query('SELECT COUNT(1) AS cuenta FROM permisos_xperfil WHERE idmenu=? and idperfil=?', [idmenu, idperfil]);
+
+        var exist = countExist[0].cuenta;
+
+        if (exist === 1) {
+
+            await pool.query('UPDATE permisos_xperfil SET crear = ? WHERE idmenu = ? AND idperfil=?', [acceso, idmenu, idperfil]);
+
+            res.send('Actualizado');
+
+        } else {
+            res.send('Error');
+        }
+
+    }
+    
+    if(permiso === 'editar'){
+
+        var countExist = await pool.query('SELECT COUNT(1) AS cuenta FROM permisos_xperfil WHERE idmenu=? and idperfil=?', [idmenu, idperfil]);
+
+        var exist = countExist[0].cuenta;
+
+        if (exist === 1) {
+
+            await pool.query('UPDATE permisos_xperfil SET editar = ? WHERE idmenu = ? AND idperfil=?', [acceso, idmenu, idperfil]);
+
+            res.send('Actualizado');
+
+        } else {
+            res.send('Error');
+        }
+
+    }
+
+    if (permiso === 'eliminar') {
+
+        var countExist = await pool.query('SELECT COUNT(1) AS cuenta FROM permisos_xperfil WHERE idmenu=? and idperfil=?', [idmenu, idperfil]);
+
+        var exist = countExist[0].cuenta;
+
+        if (exist === 1) {
+
+            await pool.query('UPDATE permisos_xperfil SET eliminar = ? WHERE idmenu = ? AND idperfil=?', [acceso, idmenu, idperfil]);
+
+            res.send('Actualizado');
+
+        } else {
+            res.send('Error');
+        }
 
     }
 
@@ -230,56 +343,168 @@ exports.getpermisosxUsuario = async (req, res) => {
         const array = results[x];
 
         if (array.acceso === 1) {
-            var checkBox = "<input type='checkbox' class='checkAccesoUser' idMenu=" + "'" + array.idmenu + "'" + " id=" + "'" + array.idmenu + "u 'checked" + ">";
+
+            var checkBoxAcceso = "<input type='checkbox' class='checkAccesoUser' idPadre=" + "'" + array.id_padre + "'" + " idMenu=" + "'" + array.idmenu + "'" + " id=" + "'" + array.idmenu + "u' checked" + ">";
+
+            if (array.id_padre === 0) {
+                var checkBoxCrear = null;
+                var checkBoxEditar = null;
+                var checkBoxEliminar = null;
+            } else {
+                if (array.crear === 1) {
+                    var checkBoxCrear = "<input type='checkbox' class='checkCrearxUser' idMenu=" + "'" + array.idmenu + "'" + " id=" + "'" + array.idmenu + "uc' checked" + ">";
+                } else {
+                    var checkBoxCrear = "<input type='checkbox' class='checkCrearxUser' idMenu=" + "'" + array.idmenu + "'" + " id=" + "'" + array.idmenu + "uc' " + ">";
+                }
+
+                if (array.editar === 1) {
+                    var checkBoxEditar = "<input type='checkbox' class='checkEditarxUser' idMenu=" + "'" + array.idmenu + "'" + " id=" + "'" + array.idmenu + "ue' checked" + ">";
+                } else {
+                    var checkBoxEditar = "<input type='checkbox' class='checkEditarxUser' idMenu=" + "'" + array.idmenu + "'" + " id=" + "'" + array.idmenu + "ue' " + ">";
+                }
+
+                if (array.eliminar === 1) {
+                    var checkBoxEliminar = "<input type='checkbox' class='checkEliminarxUser' idMenu=" + "'" + array.idmenu + "'" + " id=" + "'" + array.idmenu + "uel' checked" + ">";
+                } else {
+                    var checkBoxEliminar = "<input type='checkbox' class='checkEliminarxUser' idMenu=" + "'" + array.idmenu + "'" + " id=" + "'" + array.idmenu + "uel' " + ">";
+                }
+
+            }
+
+
         } else {
-            var checkBox = "<input type='checkbox' class='checkAccesoUser' idMenu=" + "'" + array.idmenu + "'" + " id=" + "'" + array.idmenu + "u' " + ">";
+
+            var checkBoxAcceso = "<input type='checkbox' class='checkAccesoUser' idPadre=" + "'" + array.id_padre + "'" + " idMenu=" + "'" + array.idmenu + "'" + " id=" + "'" + array.idmenu + "u' " + ">";
+
+            if (array.id_padre === 0) {
+                var checkBoxCrear = null;
+                var checkBoxEditar = null;
+                var checkBoxEliminar = null;
+            } else {
+                var checkBoxCrear = "<input type='checkbox' class='checkCrearxUser' idMenu=" + "'" + array.idmenu + "'" + " id=" + "'" + array.idmenu + "uc' " + " disabled>";
+                var checkBoxEditar = "<input type='checkbox' class='checkEditarxUser' idMenu=" + "'" + array.idmenu + "'" + " id=" + "'" + array.idmenu + "ue' " + " disabled>";
+                var checkBoxEliminar = "<input type='checkbox' class='checkEliminarxUser' idMenu=" + "'" + array.idmenu + "'" + " id=" + "'" + array.idmenu + "uel' " + " disabled>";
+            }
+
         }
 
         const obj = [
             array.new_orden,
             array.idmenu,
             array.menu,
-            checkBox,
+            checkBoxAcceso,
+            checkBoxCrear,
+            checkBoxEditar,
+            checkBoxEliminar,
             array.id_padre
         ];
 
         dataset.push(obj);
     }
 
-    res.send(dataset);
+    res.send(dataset)
 
 }
 
-
 exports.activarPermxUser = async (req, res) => {
 
-    var { idmenu, idusuario, acceso } = req.body;
+    var { idmenu, idusuario, acceso, permiso } = req.body;
 
-    const newPermiso = {
-        idmenu,
-        idusuario,
-        acceso
-    };
+    if (permiso === 'accesar') {
 
-    var countExist = await pool.query('SELECT COUNT(*) AS cuenta FROM permisos_xusuario WHERE idmenu=? and idusuario=?', [idmenu, idusuario]);
+        var crear = 0;
+        var editar = 0;
+        var eliminar = 0;
 
-    var exist = countExist[0].cuenta;
+        const newPermiso = {
+            idmenu,
+            idusuario,
+            acceso,
+            crear,
+            editar,
+            eliminar
+        };
 
-    if (exist === 0) {
+        var countExist = await pool.query('SELECT COUNT(1) AS cuenta FROM permisos_xusuario WHERE idmenu=? and idusuario=?', [idmenu, idusuario]);
 
-        await pool.query('INSERT INTO permisos_xusuario SET ?', [newPermiso]);
+        var exist = countExist[0].cuenta;
 
-        res.send('Insertado');
+        if (exist === 0) {
 
-    } else {
+            await pool.query('INSERT INTO permisos_xusuario SET ?', [newPermiso]);
 
-        await pool.query('UPDATE permisos_xusuario SET acceso = ? WHERE idmenu = ? AND idusuario=?', [newPermiso.acceso, newPermiso.idmenu, newPermiso.idusuario]);
+            res.send('Insertado');
 
-        res.send('Actualizado');
+        } else {
+
+            if (newPermiso.acceso === 0) {
+                await pool.query('UPDATE permisos_xusuario SET acceso = ?, crear = ?, editar = ?, eliminar = ? WHERE idmenu = ? AND idusuario=?', [newPermiso.acceso, newPermiso.crear, newPermiso.editar, newPermiso.eliminar, newPermiso.idmenu, newPermiso.idusuario]);
+            } else {
+                await pool.query('UPDATE permisos_xusuario SET acceso = ? WHERE idmenu = ? AND idusuario=?', [newPermiso.acceso, newPermiso.idmenu, newPermiso.idusuario]);
+            }
+
+            res.send('Actualizado');
+
+        }
+
+    }
+
+    if (permiso === 'crear') {
+
+        var countExist = await pool.query('SELECT COUNT(1) AS cuenta FROM permisos_xusuario WHERE idmenu=? and idusuario=?', [idmenu, idusuario]);
+
+        var exist = countExist[0].cuenta;
+
+        if (exist === 1) {
+
+            await pool.query('UPDATE permisos_xusuario SET crear = ? WHERE idmenu = ? AND idusuario=?', [acceso, idmenu, idusuario]);
+
+            res.send('Actualizado');
+
+        } else {
+            res.send('Error');
+        }
+
+    }
+
+    if (permiso === 'editar') {
+
+        var countExist = await pool.query('SELECT COUNT(1) AS cuenta FROM permisos_xusuario WHERE idmenu=? and idusuario=?', [idmenu, idusuario]);
+
+        var exist = countExist[0].cuenta;
+
+        if (exist === 1) {
+
+            await pool.query('UPDATE permisos_xusuario SET editar = ? WHERE idmenu = ? AND idusuario=?', [acceso, idmenu, idusuario]);
+
+            res.send('Actualizado');
+
+        } else {
+            res.send('Error');
+        }
+
+    }
+
+    if (permiso === 'eliminar') {
+
+        var countExist = await pool.query('SELECT COUNT(1) AS cuenta FROM permisos_xusuario WHERE idmenu=? and idusuario=?', [idmenu, idusuario]);
+
+        var exist = countExist[0].cuenta;
+
+        if (exist === 1) {
+
+            await pool.query('UPDATE permisos_xusuario SET eliminar = ? WHERE idmenu = ? AND idusuario=?', [acceso, idmenu, idusuario]);
+
+            res.send('Actualizado');
+
+        } else {
+            res.send('Error');
+        }
 
     }
 
 }
+
 
 exports.oficinas = async (req, res) => {
 
@@ -287,11 +512,13 @@ exports.oficinas = async (req, res) => {
     var url = req.originalUrl;
 
     var permiso = await validAccess(idUsuario, url);
+    var permisoCrear = await validaPermisoCrear(idUsuario, url);
 
     if (permiso > 0) {
 
         res.render('modulos/empresa/oficinas', {
-            nombrePagina: 'Oficinas'
+            nombrePagina: 'Oficinas',
+            permisoCrear
         });
 
     } else {
@@ -339,7 +566,7 @@ exports.agregarOficina = async (req, res) => {
 exports.mostrarOficinas = async (req, res) => {
 
     const values = await pool.query('SELECT * FROM oficinas');
-
+    const idUsuario = res.locals.usuario.idusuario;
     var valuesTotal = values.length;
 
     if (valuesTotal === 0) {
@@ -349,18 +576,42 @@ exports.mostrarOficinas = async (req, res) => {
     } else {
 
         const dataOficinas = [];
+        const route = '/oficinas';
+
+        var permisoEditar = await validaPermisoEditar(idUsuario, route);
+        var permisoEliminar = await validaPermisoEliminar(idUsuario, route);
+
 
         for (var x = 0; x < valuesTotal; x++) {
 
             conteo = x + 1;
             const arrayOficinas = values[x];
-            var botones = "<div class='btn-group'><button type='button' id='btn-editar-oficina' class='btn btn-warning' data-toggle='modal' data-target='#modalEditarOficina' idOficina=" + "'" + arrayOficinas.idoficina + "'" + "><i class='fas fa-pencil-alt'></i></button></div>";
 
-            if (arrayOficinas.status === 0) {
-                var status = "<button type='button' id='btn-estatus-oficina' class='btn btn-danger btn-sm' estadoOficina='1' idOficina=" + "'" + arrayOficinas.idoficina + "'" + ">Desactivado</button>";
-            } else {
-                var status = "<button type='button' id='btn-estatus-oficina' class='btn btn-success btn-sm' estadoOficina='0' idOficina=" + "'" + arrayOficinas.idoficina + "'" + ">Activado</button>";
+            if(permisoEditar > 0){
+
+                var botonEditar = "<button type='button' id='btn-editar-oficina' class='btn btn-warning' data-toggle='modal' data-target='#modalEditarOficina' idOficina=" + "'" + arrayOficinas.idoficina + "'" + "><i class='fas fa-pencil-alt'></i></button>";
+
+                if (arrayOficinas.status === 0) {
+                    var status = "<button type='button' id='btn-estatus-oficina' class='btn btn-danger btn-sm' estadoOficina='1' idOficina=" + "'" + arrayOficinas.idoficina + "'" + ">Desactivado</button>";
+                } else {
+                    var status = "<button type='button' id='btn-estatus-oficina' class='btn btn-success btn-sm' estadoOficina='0' idOficina=" + "'" + arrayOficinas.idoficina + "'" + ">Activado</button>";
+                }
+
+            }else{
+
+                var botonEditar = "<button type='button' id='btn-editar-oficina' class='btn btn-warning' data-toggle='modal' data-target='#modalEditarOficina' idOficina=" + "'" + arrayOficinas.idoficina + "'" + "' disabled" + "><i class='fas fa-pencil-alt'></i></button>";
+
+                if (arrayOficinas.status === 0) {
+                    var status = "<button type='button' id='btn-estatus-oficina' class='btn btn-danger btn-sm' estadoOficina='1' idOficina=" + "'" + arrayOficinas.idoficina + "'" + "' disabled" + ">Desactivado</button>";
+                } else {
+                    var status = "<button type='button' id='btn-estatus-oficina' class='btn btn-success btn-sm' estadoOficina='0' idOficina=" + "'" + arrayOficinas.idoficina + "'" + "' disabled" + ">Activado</button>";
+                }
+
             }
+
+            var botones = "<div class='btn-group'>" + botonEditar + "</div>";
+
+            
 
             var fecha = moment(arrayOficinas.fecha_creacion).format('YYYY-MM-DD hh:mm:ss a');
 
@@ -427,11 +678,13 @@ exports.verificadores = async (req, res) => {
     var url = req.originalUrl;
 
     var permiso = await validAccess(idUsuario, url);
+    var permisoCrear = await validaPermisoCrear(idUsuario, url);
 
     if (permiso > 0) {
 
         res.render('modulos/empresa/verificadores', {
-            nombrePagina: 'Verificadores'
+            nombrePagina: 'Verificadores',
+            permisoCrear
         });
 
     } else {
@@ -487,7 +740,7 @@ exports.agregarVerif = async (req, res) => {
 exports.mostrarVerif = async (req, res) => {
 
     const values = await pool.query('SELECT a.idverificador, UPPER(b.nombre_completo) AS nombre_completo, b.email, b.telefono, a.status, a.fecha_creacion FROM verificadores a INNER JOIN empleados b ON a.idempleado=b.idempleado');
-
+    const idUsuario = res.locals.usuario.idusuario;
     var valuesTotal = values.length;
 
     if (valuesTotal === 0) {
@@ -497,16 +750,28 @@ exports.mostrarVerif = async (req, res) => {
     } else {
 
         const dataVerif = [];
+        const route = '/verificadores';
+
+        var permisoEditar = await validaPermisoEditar(idUsuario, route);
+        var permisoEliminar = await validaPermisoEliminar(idUsuario, route);
 
         for (var x = 0; x < valuesTotal; x++) {
 
             conteo = x + 1;
             const arrayVerif = values[x];
-            //var botones = "<div class='btn-group'><a type='button' id='btn-editar-verif' rel='nofollow' class='btn btn-warning' href=" + "'/editar_verificador/" + arrayVerif.idverificador + "'" + " idVerif=" + "'" + arrayVerif.idverificador + "'" + "><i class='fas fa-pencil-alt'></i></a></div>";
-            if (arrayVerif.status === 0) {
-                var status = "<button type='button' id='btn-estatus-verif' class='btn btn-danger btn-sm' estadoVerif='1' idVerif=" + "'" + arrayVerif.idverificador + "'" + ">Desactivado</button>";
-            } else {
-                var status = "<button type='button' id='btn-estatus-verif' class='btn btn-success btn-sm' estadoVerif='0' idVerif=" + "'" + arrayVerif.idverificador + "'" + ">Activado</button>";
+
+            if(permisoEditar > 0){
+                if (arrayVerif.status === 0) {
+                    var status = "<button type='button' id='btn-estatus-verif' class='btn btn-danger btn-sm' estadoVerif='1' idVerif=" + "'" + arrayVerif.idverificador + "'" + ">Desactivado</button>";
+                } else {
+                    var status = "<button type='button' id='btn-estatus-verif' class='btn btn-success btn-sm' estadoVerif='0' idVerif=" + "'" + arrayVerif.idverificador + "'" + ">Activado</button>";
+                }
+            }else{
+                if (arrayVerif.status === 0) {
+                    var status = "<button type='button' id='btn-estatus-verif' class='btn btn-danger btn-sm' estadoVerif='1' idVerif=" + "'" + arrayVerif.idverificador + "'" + "'" + "' disabled" + ">Desactivado</button>";
+                } else {
+                    var status = "<button type='button' id='btn-estatus-verif' class='btn btn-success btn-sm' estadoVerif='0' idVerif=" + "'" + arrayVerif.idverificador + "'" + "'" + "' disabled" + ">Activado</button>";
+                }
             }
 
             var fecha = moment(arrayVerif.fecha_creacion).format('YYYY-MM-DD hh:mm:ss a');
@@ -667,5 +932,62 @@ async function validAccess(idUsuario, url) {
     var permiso = permiso + validPermU[0].cuenta + validPermP[0].cuenta;
 
     return permiso
+
+}
+
+async function validaPermisoCrear(idUsuario, route) {
+
+    var permiso = 0;
+
+    var idPerfilQry = await pool.query('SELECT idperfil FROM usuarios WHERE idusuario=?', idUsuario);
+    var idMenuQry = await pool.query('SELECT idmenu FROM menu WHERE url=?', route);
+
+    var idPerfil = idPerfilQry[0].idperfil;
+    var idMenu = idMenuQry[0].idmenu;
+
+    var validPermU = await pool.query('SELECT COUNT(1) as cuenta FROM permisos_xusuario WHERE idmenu=? AND idusuario=? AND crear=1', [idMenu, idUsuario]);
+    var validPermP = await pool.query('SELECT COUNT(1) as cuenta FROM permisos_xperfil WHERE idmenu=? AND idperfil=? AND crear=1', [idMenu, idPerfil]);
+
+    var permiso = permiso + validPermU[0].cuenta + validPermP[0].cuenta;
+
+    return permiso;
+
+}
+
+async function validaPermisoEditar(idUsuario, route) {
+
+    var permiso = 0;
+
+    var idPerfilQry = await pool.query('SELECT idperfil FROM usuarios WHERE idusuario=?', idUsuario);
+    var idMenuQry = await pool.query('SELECT idmenu FROM menu WHERE url=?', route);
+
+    var idPerfil = idPerfilQry[0].idperfil;
+    var idMenu = idMenuQry[0].idmenu;
+
+    var validPermU = await pool.query('SELECT COUNT(1) as cuenta FROM permisos_xusuario WHERE idmenu=? AND idusuario=? AND editar=1', [idMenu, idUsuario]);
+    var validPermP = await pool.query('SELECT COUNT(1) as cuenta FROM permisos_xperfil WHERE idmenu=? AND idperfil=? AND editar=1', [idMenu, idPerfil]);
+
+    var permiso = permiso + validPermU[0].cuenta + validPermP[0].cuenta;
+
+    return permiso;
+
+}
+
+async function validaPermisoEliminar(idUsuario, route) {
+
+    var permiso = 0;
+
+    var idPerfilQry = await pool.query('SELECT idperfil FROM usuarios WHERE idusuario=?', idUsuario);
+    var idMenuQry = await pool.query('SELECT idmenu FROM menu WHERE url=?', route);
+
+    var idPerfil = idPerfilQry[0].idperfil;
+    var idMenu = idMenuQry[0].idmenu;
+
+    var validPermU = await pool.query('SELECT COUNT(1) as cuenta FROM permisos_xusuario WHERE idmenu=? AND idusuario=? AND eliminar=1', [idMenu, idUsuario]);
+    var validPermP = await pool.query('SELECT COUNT(1) as cuenta FROM permisos_xperfil WHERE idmenu=? AND idperfil=? AND eliminar=1', [idMenu, idPerfil]);
+
+    var permiso = permiso + validPermU[0].cuenta + validPermP[0].cuenta;
+
+    return permiso;
 
 }
