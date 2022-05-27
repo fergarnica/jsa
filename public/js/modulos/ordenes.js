@@ -972,11 +972,22 @@ $(document).on("click", "#btn-export-agenda", function () {
 /*=============================================
 IMPRIMIR ORDENES
 =============================================*/
-$(document).on("click", "#btn-imprimir-orden", function () {
+$(document).on("click", ".btn-imprimir-orden", function () {
 
     var payload = {};
 
     var idOrden = $(this).attr("idOrden");
+
+    /*var urlImg = $(this).attr("urlimage");
+
+    payloadImg.img = urlImg;
+
+    axios.post('/download_img', payloadImg)
+        .then(function (respuesta) {
+
+            console.log(respuesta);
+
+        })*/
 
     payload.idorden = idOrden;
 
@@ -991,7 +1002,15 @@ $(document).on("click", "#btn-imprimir-orden", function () {
 
             if (data.length > 0) {
 
-                //$(this).attr("idOrden").html('<i class="fa fa-print"></i>').removeClass('disabled');
+                if(data == 'Error'){
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Hubo un error',
+                        text: 'Error al recuperar la imagen del verificador!'
+                    })
+
+                }else{
 
                 var type = 'application/pdf';
                 const blobURL = URL.createObjectURL(pdfBlobConversion(data, type));
@@ -1003,6 +1022,10 @@ $(document).on("click", "#btn-imprimir-orden", function () {
                 }
                 theScript.innerHTML = 'window.onload = ${injectThis.toString()};';
                 theDoc.body.appendChild(theScript);
+
+                }
+
+               
 
             } else {
 

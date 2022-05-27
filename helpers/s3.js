@@ -48,17 +48,21 @@ const downloadFile = async (fileKey, location) => {
     Bucket: bucketName
   }
 
-  const { Body } = await s3.getObject(params).promise();
+  try {
+    const { Body } = await s3.getObject(params).promise();
+    await fs.writeFile(location + fileKey, Body, function (err, result) {
+      if (err) console.log('error', err);
+    });
+    const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
+    await delay(250);
+    return { success: true}
+  } catch(error) {
+    return { success: false, data: null }
+  }
 
-  await fs.writeFile(location + fileKey, Body, function (err, result) {
-    if (err) console.log('error', err);
-    
-  });
-
-  return true;
 }
 
-function deleteFile (fileKey) {
+function deleteFile(fileKey) {
   try {
     const params = {
       Key: fileKey,

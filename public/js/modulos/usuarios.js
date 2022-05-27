@@ -1471,7 +1471,9 @@ $("#imgEmpleado").change(function () {
 /*=============================================
 Subir/Cambiar Imagen
 =============================================*/
-$(document).on("click", "#btn-imagen-empl", function () {
+$(document).on("click", ".btn-imagen-empl", function () {
+
+    $("#previsualizar").remove();
 
     var idEmpleado = $(this).attr("idEmpleado");
 
@@ -1481,6 +1483,10 @@ $(document).on("click", "#btn-imagen-empl", function () {
 
     axios.get(route)
         .then(function (respuesta) {
+
+            $("#div-img-previ").append(
+                '<img class="img-thumbnail" id="previsualizar" width="100px">'
+            );
 
             if (respuesta.data != 'empty') {
 
