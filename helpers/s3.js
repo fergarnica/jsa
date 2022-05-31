@@ -14,6 +14,8 @@ const s3 = new S3({
   secretAccessKey
 });
 
+const bucket = bucketName;
+
 // uploads a file to s3
 function uploadFile(file, uuid) {
 
@@ -56,8 +58,8 @@ const downloadFile = async (fileKey, location) => {
     });
     const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
     await delay(250);
-    return { success: true}
-  } catch(error) {
+    return { success: true }
+  } catch (error) {
     return { success: false, data: null }
   }
 
@@ -78,6 +80,8 @@ function deleteFile(fileKey) {
 }
 
 module.exports = {
+  s3,
+  bucket,
   uploadFile,
   getFileStream,
   downloadFile,

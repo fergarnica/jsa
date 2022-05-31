@@ -978,17 +978,6 @@ $(document).on("click", ".btn-imprimir-orden", function () {
 
     var idOrden = $(this).attr("idOrden");
 
-    /*var urlImg = $(this).attr("urlimage");
-
-    payloadImg.img = urlImg;
-
-    axios.post('/download_img', payloadImg)
-        .then(function (respuesta) {
-
-            console.log(respuesta);
-
-        })*/
-
     payload.idorden = idOrden;
 
     openLoading();

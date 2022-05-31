@@ -6,7 +6,7 @@ const fsPromises = require("fs").promises;
 
 const moment = require('moment');
 
-const { uploadFile, getFileStream, downloadFile } = require('../helpers/s3');
+const { s3, bucket, uploadFile, getFileStream, downloadFile } = require('../helpers/s3');
 
 var fonts = require('../public/fonts/fonts');
 
@@ -209,76 +209,7 @@ exports.mostrarOrdenes = async (req, res) => {
             res.send(dataset);
 
         } else if (idstatus_orden == 2) {
-
-            var location = __dirname + '../../public/uploads/empleados/';
-            var locationUpload = __dirname + '../../public/uploads/';
-            var locationLogos = __dirname + '../../public/uploads/logos/';
-
-            if (fs.existsSync(locationUpload)) {
-                var existDirUpload = 1;
-            } else {
-                var existDirUpload = 0;
-            }
-
-            if (existDirUpload === 0) {
-                await createDir(locationUpload);
-            }
-
-            if (fs.existsSync(location)) {
-                var existDir = 1;
-            } else {
-                var existDir = 0;
-            }
-
-            if (existDir === 0) {
-                await createDir(location);
-            }
-
-            if (fs.existsSync(locationLogos)) {
-                var existDirLogo = 1;
-            } else {
-                var existDirLogo = 0;
-            }
-
-            if (existDirLogo === 0) {
-                await createDir(locationLogos);
-            }
-
-            var imgLogo = 'logo_edomex.png';
-            var imgLogoIsm = 'logo_isem.jpeg';
-            var imgFooter = 'footer.png';
-
-            if (fs.existsSync(locationLogos + imgLogo)) {
-                var existImgLogo = 1;
-            } else {
-                var existImgLogo = 0;
-            }
-
-            if (fs.existsSync(locationLogos + imgLogoIsm)) {
-                var existImgLogoIsm = 1;
-            } else {
-                var existImgLogoIsm = 0;
-            }
-
-            if (fs.existsSync(locationLogos + imgFooter)) {
-                var existImgFooter = 1;
-            } else {
-                var existImgFooter = 0;
-            }
-
-            /*DESCARGA LOGOS*/
-            if (existImgLogo === 0) {
-                await downloadFile(imgLogo, locationLogos);
-            }
-
-            if (existImgLogoIsm === 0) {
-                await downloadFile(imgLogoIsm, locationLogos);
-            }
-
-            if (existImgFooter === 0) {
-                await downloadFile(imgFooter, locationLogos);
-            }
-
+            
             for (var x = 0; x < results.length; x++) {
 
                 const array = results[x];
@@ -845,53 +776,6 @@ exports.printOrden = async (req, res) => {
 
         var imgNameFile = dataOrden[0].imagen;
 
-        var location = __dirname + '../../public/uploads/empleados/';
-        var locationLogos = __dirname + '../../public/uploads/logos/';
-
-        var imgLogo = 'logo_edomex.png';
-        var imgLogoIsm = 'logo_isem.jpeg';
-        var imgFooter = 'footer.png';
-
-        if (fs.existsSync(location + imgNameFile)) {
-            var existImgEmpl = 1;
-        } else {
-            var existImgEmpl = 0;
-        }
-
-        if (fs.existsSync(locationLogos + imgLogo)) {
-            var existImgLogo = 1;
-        } else {
-            var existImgLogo = 0;
-        }
-
-        if (fs.existsSync(locationLogos + imgLogoIsm)) {
-            var existImgLogoIsm = 1;
-        } else {
-            var existImgLogoIsm = 0;
-        }
-
-        if (fs.existsSync(locationLogos + imgFooter)) {
-            var existImgFooter = 1;
-        } else {
-            var existImgFooter = 0;
-        }
-
-        if (existImgEmpl === 0) {
-            await downloadFile(imgNameFile, location);
-        }
-
-        if (existImgLogo === 0) {
-            await downloadFile(imgLogo, locationLogos);
-        }
-
-        if (existImgLogoIsm === 0) {
-            await downloadFile(imgLogoIsm, locationLogos);
-        }
-
-        if (existImgFooter === 0) {
-            await downloadFile(imgFooter, locationLogos);
-        }
-
         await printPdfImage(imgNameFile, dataOrden, res);
 
     }
@@ -1003,16 +887,29 @@ exports.cerrarOrden = async (req, res) => {
 
 }
 
-async function printPdfImage(imgFile, dataOrden, res) {
+async function getFileB64(fileKey) {
 
-    var location = __dirname + '../../public/uploads/empleados/';
-    var locationLogos = __dirname + '../../public/uploads/logos/';
+    const params = {
+        Key: fileKey,
+        Bucket: bucket
+    }
+
+    const { Body, ContentType } = await s3.getObject(params).promise();
+
+    let image = Buffer.from(Body).toString('base64');
+    image = "data:" + ContentType + ";base64," + image;
+    return image;
+
+
+}
+
+async function printPdfImage(imgFile, dataOrden, res) {
 
     var imgLogo = 'logo_edomex.png';
     var imgLogoIsm = 'logo_isem.jpeg';
     var imgFooter = 'footer.png';
 
-    var file = (location, name) => {
+    /* var file = (location, name) => {
         return new Promise((resolve, reject) => {
             fs.readFile(location + name, (err, data) => {
                 if (err) reject(err)
@@ -1020,22 +917,12 @@ async function printPdfImage(imgFile, dataOrden, res) {
             })
         })
 
-    }
+    } */
 
-    const content = await file(location, imgFile);
-    const contentLogo = await file(locationLogos, imgLogo);
-    const contentLogoIsm = await file(locationLogos, imgLogoIsm);
-    const contentFooter = await file(locationLogos, imgFooter);
-
-    var dataBase64 = Buffer.from(content).toString('base64');
-    var dataBase64Logo = Buffer.from(contentLogo).toString('base64');
-    var dataBase64LogoIsm = Buffer.from(contentLogoIsm).toString('base64');
-    var dataBase64Footer = Buffer.from(contentFooter).toString('base64');
-
-    var imageVerif = 'data:image/png;base64,' + dataBase64;
-    var logoImg = 'data:image/png;base64,' + dataBase64Logo;
-    var logoImgIsem = 'data:image/png;base64,' + dataBase64LogoIsm;
-    var logoFooter = 'data:image/png;base64,' + dataBase64Footer;
+    const imageVerif = await getFileB64(imgFile);
+    const logoImg = await getFileB64(imgLogo);
+    const logoImgIsem = await getFileB64(imgLogoIsm);
+    const logoFooter = await getFileB64(imgFooter);
 
     var docDefinition = {
         info: {
@@ -1197,13 +1084,13 @@ async function printPdfImage(imgFile, dataOrden, res) {
 
 }
 
-async function createDir(dir) {
+/* async function createDir(dir) {
     try {
         await fsPromises.access(dir, fs.constants.F_OK);
     } catch (e) {
         await fsPromises.mkdir(dir);
     }
-}
+} */
 
 async function validAccess(idUsuario, url) {
 
