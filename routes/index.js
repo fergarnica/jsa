@@ -151,10 +151,10 @@ module.exports = function () {
         isLoggedIn,
         usuariosController.mostrarImgEmpl
     );
-    router.post('/download_img',
+    /* router.post('/download_img',
         isLoggedIn,
         usuariosController.descargarImgEmpl
-    );
+    ); */
 
     //Perfiles
     router.get('/perfiles',

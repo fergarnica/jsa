@@ -952,7 +952,7 @@ exports.mostrarUsuariosActivos = async (req, res) => {
     }
 }
 
-exports.descargarImgEmpl = async (req, res) => {
+/* exports.descargarImgEmpl = async (req, res) => {
 
     const { img } = req.body;
     const location = __dirname + '../../public/uploads/empleados/';
@@ -966,7 +966,7 @@ exports.descargarImgEmpl = async (req, res) => {
         res.send('download');
     }
 
-}
+} */
 
 async function validAccess(idUsuario, url) {
 

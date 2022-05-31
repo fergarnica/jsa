@@ -2,6 +2,7 @@ const pool = require('../config/db');
 const fs = require('fs');
 const Excel = require('exceljs');
 const pdfMakePrinter = require('pdfmake/src/printer');
+const fsPromises = require("fs").promises;
 
 const moment = require('moment');
 
@@ -209,7 +210,39 @@ exports.mostrarOrdenes = async (req, res) => {
 
         } else if (idstatus_orden == 2) {
 
+            var location = __dirname + '../../public/uploads/empleados/';
+            var locationUpload = __dirname + '../../public/uploads/';
             var locationLogos = __dirname + '../../public/uploads/logos/';
+
+            if (fs.existsSync(locationUpload)) {
+                var existDirUpload = 1;
+            } else {
+                var existDirUpload = 0;
+            }
+
+            if (existDirUpload === 0) {
+                await createDir(locationUpload);
+            }
+
+            if (fs.existsSync(location)) {
+                var existDir = 1;
+            } else {
+                var existDir = 0;
+            }
+
+            if (existDir === 0) {
+                await createDir(location);
+            }
+
+            if (fs.existsSync(locationLogos)) {
+                var existDirLogo = 1;
+            } else {
+                var existDirLogo = 0;
+            }
+
+            if (existDirLogo === 0) {
+                await createDir(locationLogos);
+            }
 
             var imgLogo = 'logo_edomex.png';
             var imgLogoIsm = 'logo_isem.jpeg';
@@ -245,7 +278,6 @@ exports.mostrarOrdenes = async (req, res) => {
             if (existImgFooter === 0) {
                 await downloadFile(imgFooter, locationLogos);
             }
-
 
             for (var x = 0; x < results.length; x++) {
 
@@ -811,14 +843,14 @@ exports.printOrden = async (req, res) => {
 
         }
 
+        var imgNameFile = dataOrden[0].imagen;
+
         var location = __dirname + '../../public/uploads/empleados/';
         var locationLogos = __dirname + '../../public/uploads/logos/';
 
         var imgLogo = 'logo_edomex.png';
         var imgLogoIsm = 'logo_isem.jpeg';
         var imgFooter = 'footer.png';
-
-        var imgNameFile = dataOrden[0].imagen;
 
         if (fs.existsSync(location + imgNameFile)) {
             var existImgEmpl = 1;
@@ -1163,6 +1195,14 @@ async function printPdfImage(imgFile, dataOrden, res) {
 
 
 
+}
+
+async function createDir(dir) {
+    try {
+        await fsPromises.access(dir, fs.constants.F_OK);
+    } catch (e) {
+        await fsPromises.mkdir(dir);
+    }
 }
 
 async function validAccess(idUsuario, url) {

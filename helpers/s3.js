@@ -39,6 +39,7 @@ function getFileStream(fileKey) {
   }
 
   return s3.getObject(downloadParams).createReadStream();
+
 }
 
 const downloadFile = async (fileKey, location) => {
